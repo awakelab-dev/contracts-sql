@@ -1,0 +1,159 @@
+Claro 😊
+Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de tablas y campos**, pensada para que cualquiera pueda leerla sin perderse en detalles técnicos.
+
+---
+
+## Usuarios
+
+**Tabla:** users
+
+* id
+* email
+* password_hash
+* role
+* created_at
+* updated_at
+
+---
+
+## Cursos
+
+**Tabla:** courses
+
+* id
+* code
+* name
+
+---
+
+## Alumnos
+
+**Tabla:** students
+
+* id
+* full_name
+* dni_nie
+* course_code
+* practices_start
+* practices_end
+* employment_status
+* notes
+
+---
+
+## Prácticas
+
+**Tabla:** internships
+
+* id
+* student_id
+* company_name
+* start_date
+* end_date
+
+---
+
+## Entrevistas
+
+**Tabla:** interviews
+
+* id
+* student_id
+* place
+* interview_date
+* notes
+
+---
+
+## Empresas
+
+**Tabla:** companies
+
+* id
+* name
+* sector
+* contact_name
+* contact_email
+* contact_phone
+* notes
+
+---
+
+## Vacantes
+
+**Tabla:** vacancies
+
+* id
+* company_id
+* title
+* sector
+* requirements
+* status
+* deadline
+
+---
+
+## Empleos / Contratos
+
+**Tabla:** employment_contracts
+
+* id
+* student_id
+* sector
+* position
+* employer
+* contract_type
+* attached_contract
+* workday
+* worked_days
+* start_date
+* end_date
+
+---
+
+## Invitaciones a vacantes
+
+**Tabla:** invitations
+
+* id
+* vacancy_id
+* student_id
+* status
+* sent_at
+* responded_at
+
+---
+
+## Documentos (CVs)
+
+**Tabla:** documents
+
+* id
+* student_id
+* type
+* url
+* uploaded_at
+
+---
+
+## Importaciones
+
+**Tabla:** import_jobs
+
+* id
+* source
+* created_at
+* status
+
+---
+
+## Errores de importación
+
+**Tabla:** import_errors
+
+* id
+* job_id
+* row_number
+* message
+* raw_data
+
