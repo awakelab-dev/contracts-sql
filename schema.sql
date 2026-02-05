@@ -23,15 +23,76 @@ CREATE TABLE IF NOT EXISTS courses (
 -- Alumnos
 CREATE TABLE IF NOT EXISTS students (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  full_name VARCHAR(190) NOT NULL,
+  first_names VARCHAR(190) NOT NULL,
+  last_names VARCHAR(190) NOT NULL,
   dni_nie VARCHAR(50) NOT NULL,
-  course_code VARCHAR(50) NOT NULL,
+  social_security_number VARCHAR(50) NULL,
+  birth_date DATE NULL,
+  district VARCHAR(120) NULL,
+  phone VARCHAR(50) NULL,
+  email VARCHAR(190) NULL,
   practices_start DATE NULL,
   practices_end DATE NULL,
   employment_status ENUM("unemployed","employed","improved","unknown") DEFAULT "unknown",
   notes TEXT NULL,
-  UNIQUE KEY uq_students_dni (dni_nie),
-  INDEX idx_students_course (course_code)
+  UNIQUE KEY uq_students_dni (dni_nie)
+) ENGINE=InnoDB;
+
+-- Cursos realizados por alumno
+CREATE TABLE IF NOT EXISTS student_courses (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  student_id BIGINT NOT NULL,
+  title VARCHAR(190) NOT NULL,
+  description TEXT NULL,
+  institution VARCHAR(190) NULL,
+  start_date DATE NULL,
+  end_date DATE NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_student_courses_student (student_id),
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- PnL (Prácticas no Laborales)
+CREATE TABLE IF NOT EXISTS pnl (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  student_id BIGINT NOT NULL,
+  company_nif VARCHAR(50) NOT NULL,
+  company_name VARCHAR(190) NOT NULL,
+  signer_name VARCHAR(190) NULL,
+  signer_nif VARCHAR(50) NULL,
+  workplace VARCHAR(190) NULL,
+  position VARCHAR(190) NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NULL,
+  schedule TEXT NULL,
+  weekly_hours INT NULL,
+  observations TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_pnl_student (student_id),
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Contrataciones (histórico de contratos)
+CREATE TABLE IF NOT EXISTS hiring_contracts (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  student_id BIGINT NOT NULL,
+  company_nif VARCHAR(50) NOT NULL,
+  company_name VARCHAR(190) NOT NULL,
+  sector VARCHAR(120) NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NULL,
+  workday_pct VARCHAR(20) NULL,
+  contribution_group VARCHAR(50) NULL,
+  contract_type VARCHAR(120) NULL,
+  weekly_hours INT NULL,
+  contributed_days INT NULL,
+  notes TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_hiring_contracts_student (student_id),
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- Prácticas
@@ -50,6 +111,7 @@ CREATE TABLE IF NOT EXISTS interviews (
   student_id BIGINT NOT NULL,
   place VARCHAR(190) NULL,
   interview_date DATE NOT NULL,
+  status ENUM("sent","attended","no_show") NOT NULL DEFAULT "sent",
   notes TEXT NULL,
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -57,13 +119,17 @@ CREATE TABLE IF NOT EXISTS interviews (
 -- Empresas
 CREATE TABLE IF NOT EXISTS companies (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  nif VARCHAR(50) NULL,
   name VARCHAR(190) NOT NULL,
+  company_email VARCHAR(190) NULL,
+  company_phone VARCHAR(50) NULL,
   sector VARCHAR(120) NULL,
   contact_name VARCHAR(120) NULL,
   contact_email VARCHAR(190) NULL,
   contact_phone VARCHAR(50) NULL,
   notes TEXT NULL,
-  UNIQUE KEY uq_company_name (name)
+  UNIQUE KEY uq_company_name (name),
+  UNIQUE KEY uq_company_nif (nif)
 ) ENGINE=InnoDB;
 
 -- Vacantes
@@ -72,9 +138,10 @@ CREATE TABLE IF NOT EXISTS vacancies (
   company_id BIGINT NOT NULL,
   title VARCHAR(190) NOT NULL,
   sector VARCHAR(120) NULL,
+  description TEXT NULL,
   requirements TEXT NULL,
   status ENUM("open","closed") DEFAULT "open",
-  deadline DATE NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -128,24 +195,8 @@ CREATE TABLE IF NOT EXISTS import_jobs (
 CREATE TABLE IF NOT EXISTS import_errors (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   job_id BIGINT NOT NULL,
-  row_number INT NOT NULL,
+  `row_number` INT NOT NULL,
   message TEXT NOT NULL,
   raw_data TEXT NULL,
   FOREIGN KEY (job_id) REFERENCES import_jobs(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-EOF
-
-# helper script to apply schema via env vars (without printing secrets)
-cat > apply-schema.sh <<\"EOF\"
-#!/usr/bin/env bash
-set -euo pipefail
-: "${DB_HOST:?set DB_HOST}" : "${DB_USER:?set DB_USER}" : "${DB_NAME:=contracts_app}"
-# DB_PASSWORD should be provided by the user securely: export DB_PASSWORD=... (will not be echoed)
-if [[ -z "${DB_PASSWORD:-}" ]]; then
-  echo "DB_PASSWORD is not set. Export it securely before running this script." 1>&2
-  exit 1
-fi
-MYSQL_PWD="$DB_PASSWORD" mysql -h "$DB_HOST" -u "$DB_USER" < schema.sql
-echo "Schema applied to $DB_HOST/$DB_NAME"
-EOF
-chmod +x apply-schema.sh

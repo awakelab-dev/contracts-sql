@@ -30,14 +30,79 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 **Tabla:** students
 
-* id
-* full_name
+* id (Nº Expediente)
+* first_names (Nombres)
+* last_names (Apellidos)
 * dni_nie
-* course_code
+* social_security_number (Nº Seguridad Social)
+* birth_date (Fecha Nacimiento)
+* district (Distrito)
+* phone (Teléfono)
+* email
 * practices_start
 * practices_end
 * employment_status
 * notes
+
+---
+
+## Cursos realizados
+
+**Tabla:** student_courses
+
+* id
+* student_id
+* title
+* description
+* institution
+* start_date
+* end_date
+* created_at
+* updated_at
+
+---
+
+## PnL (Prácticas no Laborales)
+
+**Tabla:** pnl
+
+* id
+* student_id
+* company_nif
+* company_name
+* signer_name
+* signer_nif
+* workplace
+* position
+* start_date
+* end_date
+* schedule
+* weekly_hours
+* observations
+* created_at
+* updated_at
+
+---
+
+## Contrataciones
+
+**Tabla:** hiring_contracts
+
+* id
+* student_id
+* company_nif
+* company_name
+* sector
+* start_date
+* end_date
+* workday_pct
+* contribution_group
+* contract_type
+* weekly_hours
+* contributed_days
+* notes
+* created_at
+* updated_at
 
 ---
 
@@ -70,10 +135,13 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 **Tabla:** companies
 
 * id
-* name
+* nif
+* name (Nombre / Razón Social)
+* company_email (Email Empresa)
+* company_phone (Tlf Empresa)
 * sector
-* contact_name
-* contact_email
+* contact_name (Contacto)
+* contact_email (Email Contacto)
 * contact_phone
 * notes
 
@@ -87,9 +155,10 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 * company_id
 * title
 * sector
+* description
 * requirements
 * status
-* deadline
+* created_at
 
 ---
 
