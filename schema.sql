@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS hiring_contracts (
   start_date DATE NOT NULL,
   end_date DATE NULL,
   workday_pct VARCHAR(20) NULL,
-  contribution_group VARCHAR(50) NULL,
+  contribution_group VARCHAR(190) NULL,
   contract_type VARCHAR(120) NULL,
   weekly_hours INT NULL,
   contributed_days INT NULL,
