@@ -53,6 +53,18 @@ CREATE TABLE IF NOT EXISTS student_courses (
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- Catálogo de cursos (normalizado) para Matching con IA
+-- Nota: se alimenta desde student_courses (títulos únicos)
+CREATE TABLE IF NOT EXISTS course_topics (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(190) NOT NULL,
+  description TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_course_topics_title (title)
+) ENGINE=InnoDB;
+
+
 -- PnL (Prácticas no Laborales)
 CREATE TABLE IF NOT EXISTS pnl (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -143,6 +155,22 @@ CREATE TABLE IF NOT EXISTS vacancies (
   status ENUM("open","closed") DEFAULT "open",
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Puntaje de Matching por Vacante vs Curso (IA)
+CREATE TABLE IF NOT EXISTS vacancy_course_match (
+  vacancy_id BIGINT NOT NULL,
+  course_topic_id BIGINT NOT NULL,
+  score TINYINT NOT NULL,
+  model VARCHAR(64) NOT NULL,
+  prompt_version INT NOT NULL DEFAULT 1,
+  notes VARCHAR(255) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (vacancy_id, course_topic_id),
+  INDEX idx_vacancy_course_match_vacancy (vacancy_id),
+  INDEX idx_vacancy_course_match_course (course_topic_id),
+  FOREIGN KEY (vacancy_id) REFERENCES vacancies(id) ON DELETE CASCADE,
+  FOREIGN KEY (course_topic_id) REFERENCES course_topics(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- Empleos/Contratos

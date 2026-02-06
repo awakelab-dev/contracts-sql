@@ -62,6 +62,18 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 ---
 
+## Catálogo de cursos (para Matching IA)
+
+**Tabla:** course_topics
+
+* id
+* title
+* description
+* created_at
+* updated_at
+
+---
+
 ## PnL (Prácticas no Laborales)
 
 **Tabla:** pnl
@@ -196,6 +208,20 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 * description
 * requirements
 * status
+* created_at
+
+---
+
+## Matching IA (Vacante vs Curso)
+
+**Tabla:** vacancy_course_match
+
+* vacancy_id
+* course_topic_id
+* score
+* model
+* prompt_version
+* notes
 * created_at
 
 ---
