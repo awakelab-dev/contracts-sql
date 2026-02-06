@@ -200,3 +200,40 @@ CREATE TABLE IF NOT EXISTS import_errors (
   raw_data TEXT NULL,
   FOREIGN KEY (job_id) REFERENCES import_jobs(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Liquidaciones (cierre de días cotizados)
+CREATE TABLE IF NOT EXISTS liquidations (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  target ENUM("six_months","one_year") NOT NULL,
+  mode ENUM("individual","pooled") NOT NULL DEFAULT "individual",
+  target_fte_days INT NOT NULL,
+  total_students INT NOT NULL DEFAULT 0,
+  total_fte_days_used DECIMAL(12,2) NOT NULL DEFAULT 0,
+  total_jornadas INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_liquidations_range (start_date, end_date)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS student_liquidation_balances (
+  student_id BIGINT PRIMARY KEY,
+  fte_days_balance DECIMAL(12,2) NOT NULL DEFAULT 0,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS liquidation_lines (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  liquidation_id BIGINT NOT NULL,
+  student_id BIGINT NOT NULL,
+  opening_fte_days DECIMAL(12,2) NOT NULL DEFAULT 0,
+  added_fte_days DECIMAL(12,2) NOT NULL DEFAULT 0,
+  used_fte_days DECIMAL(12,2) NOT NULL DEFAULT 0,
+  closing_fte_days DECIMAL(12,2) NOT NULL DEFAULT 0,
+  jornadas_generated INT NOT NULL DEFAULT 0,
+  FOREIGN KEY (liquidation_id) REFERENCES liquidations(id) ON DELETE CASCADE,
+  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+  INDEX idx_liquidation_lines_liquidation (liquidation_id),
+  INDEX idx_liquidation_lines_student (student_id)
+) ENGINE=InnoDB;

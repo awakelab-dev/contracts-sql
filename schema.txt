@@ -106,6 +106,44 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 ---
 
+## Liquidaciones
+
+**Tabla:** liquidations
+
+* id
+* start_date
+* end_date
+* target
+* mode
+* target_fte_days
+* total_students
+* total_fte_days_used
+* total_jornadas
+* created_at
+
+---
+
+**Tabla:** student_liquidation_balances
+
+* student_id
+* fte_days_balance
+* updated_at
+
+---
+
+**Tabla:** liquidation_lines
+
+* id
+* liquidation_id
+* student_id
+* opening_fte_days
+* added_fte_days
+* used_fte_days
+* closing_fte_days
+* jornadas_generated
+
+---
+
 ## Prácticas
 
 **Tabla:** internships
