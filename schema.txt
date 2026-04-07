@@ -26,6 +26,25 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 ---
 
+## Distritos
+
+**Tabla:** districts
+
+* code
+* municipality_code
+* name
+
+---
+
+## Municipios
+
+**Tabla:** municipalities
+
+* code
+* name
+
+---
+
 ## Alumnos
 
 **Tabla:** students
@@ -39,8 +58,8 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 * birth_date (Fecha Nacimiento)
 * age (Edad)
 * sex (Sexo)
-* district (Distrito)
-* municipality (Municipio)
+* district_code (Código Distrito)
+* municipality_code (Código Municipio)
 * phone (Teléfono)
 * email
 * practices_start

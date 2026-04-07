@@ -185,6 +185,17 @@ const DISTRICTS = [
   'Vicálvaro',
 ];
 
+const MUNICIPALITY_DEFINITIONS = [
+  { name: 'Madrid', districts: DISTRICTS },
+  { name: 'Alcalá de Henares', districts: ['Centro', 'Reyes Católicos', 'Espartales'] },
+  { name: 'Móstoles', districts: ['Centro', 'Norte Universidad'] },
+  { name: 'Getafe', districts: ['Centro', 'Sector III'] },
+  { name: 'Alcorcón', districts: ['Centro', 'Parque Lisboa'] },
+  { name: 'Leganés', districts: ['Centro', 'Zarzaquemada'] },
+  { name: 'Fuenlabrada', districts: ['Centro', 'Loranca'] },
+  { name: 'Alcobendas', districts: ['Centro', 'Valdelasfuentes'] },
+];
+
 const FIRST_NAMES = [
   'Antonio',
   'María',
@@ -399,6 +410,34 @@ for (const c of companies) {
   }
 }
 
+const municipalityCatalog = MUNICIPALITY_DEFINITIONS.map((municipality, index) => ({
+  code: index + 1,
+  name: municipality.name,
+}));
+
+const municipalityCodeByName = new Map(municipalityCatalog.map((m) => [m.name, m.code]));
+
+const districtCatalog = [];
+let districtCode = 1;
+for (const municipality of MUNICIPALITY_DEFINITIONS) {
+  const municipality_code = municipalityCodeByName.get(municipality.name);
+  if (!municipality_code) continue;
+  for (const districtName of municipality.districts) {
+    districtCatalog.push({
+      code: districtCode++,
+      municipality_code,
+      name: districtName,
+    });
+  }
+}
+
+const districtsByMunicipalityCode = new Map();
+for (const district of districtCatalog) {
+  const list = districtsByMunicipalityCode.get(district.municipality_code) || [];
+  list.push(district);
+  districtsByMunicipalityCode.set(district.municipality_code, list);
+}
+
 const students = [];
 for (let i = 1; i <= CONFIG.students; i++) {
   const { first_names, last_names, email } = genStudentName(i);
@@ -410,9 +449,11 @@ for (let i = 1; i <= CONFIG.students; i++) {
   const birth_date = randDateBetween(`${birth_year}-01-01`, `${birth_year}-12-28`);
   const age = Math.max(0, 2026 - birth_year);
   const sex = rng.chance(0.52) ? 'mujer' : 'hombre';
-
-  const district = rng.pick(DISTRICTS);
-  const municipality = 'Madrid';
+  const municipality =
+    rng.chance(0.7) ? municipalityCatalog[0] : rng.pick(municipalityCatalog.slice(1));
+  const municipalityDistricts =
+    districtsByMunicipalityCode.get(municipality.code) || districtCatalog;
+  const district = rng.pick(municipalityDistricts);
   const phone = `6${String(rng.int(0, 99999999)).padStart(8, '0')}`;
 
   students.push({
@@ -425,8 +466,8 @@ for (let i = 1; i <= CONFIG.students; i++) {
     birth_date,
     age,
     sex,
-    district,
-    municipality,
+    district_code: district.code,
+    municipality_code: municipality.code,
     phone,
     email,
     employment_status: employmentStatus(),
@@ -625,6 +666,8 @@ for (const t of [
   'liquidation_lines',
   'liquidations',
   'students',
+  'municipalities',
+  'districts',
 ]) {
   lines.push(`TRUNCATE TABLE ${t};`);
 }
@@ -646,6 +689,21 @@ insertMany(
   vacancies.map((v) => [v.company_id, v.title, v.sector, v.description, v.requirements, v.status, v.created_at]),
   200
 );
+insertMany(
+  lines,
+  'municipalities',
+  ['code', 'name'],
+  municipalityCatalog.map((municipality) => [municipality.code, municipality.name]),
+  100
+);
+
+insertMany(
+  lines,
+  'districts',
+  ['code', 'municipality_code', 'name'],
+  districtCatalog.map((district) => [district.code, district.municipality_code, district.name]),
+  100
+);
 
 insertMany(
   lines,
@@ -659,8 +717,8 @@ insertMany(
     'birth_date',
     'age',
     'sex',
-    'district',
-    'municipality',
+    'district_code',
+    'municipality_code',
     'phone',
     'email',
     'employment_status',
@@ -675,8 +733,8 @@ insertMany(
     s.birth_date,
     s.age,
     s.sex,
-    s.district,
-    s.municipality,
+    s.district_code,
+    s.municipality_code,
     s.phone,
     s.email,
     s.employment_status,

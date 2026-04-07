@@ -53,21 +53,57 @@ PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
-SET @has_municipality := (
+SET @has_district_code := (
   SELECT COUNT(*)
   FROM information_schema.columns
   WHERE table_schema = DATABASE()
     AND table_name = 'students'
-    AND column_name = 'municipality'
+    AND column_name = 'district_code'
 );
 SET @sql := IF(
-  @has_municipality = 0,
-  'ALTER TABLE students ADD COLUMN municipality VARCHAR(120) NULL AFTER district',
+  @has_district_code = 0,
+  'ALTER TABLE students ADD COLUMN district_code INT UNSIGNED NULL AFTER sex',
   'SELECT 1'
 );
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+
+SET @has_municipality_code := (
+  SELECT COUNT(*)
+  FROM information_schema.columns
+  WHERE table_schema = DATABASE()
+    AND table_name = 'students'
+    AND column_name = 'municipality_code'
+);
+SET @sql := IF(
+  @has_municipality_code = 0,
+  'ALTER TABLE students ADD COLUMN municipality_code INT UNSIGNED NULL AFTER district_code',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+CREATE TABLE IF NOT EXISTS municipalities (
+  code INT UNSIGNED NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  PRIMARY KEY (code),
+  UNIQUE KEY uq_municipalities_name (name)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS districts (
+  code INT UNSIGNED NOT NULL,
+  municipality_code INT UNSIGNED NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  PRIMARY KEY (code),
+  UNIQUE KEY uq_districts_municipality_name (municipality_code, name),
+  INDEX idx_districts_municipality_code (municipality_code),
+  CONSTRAINT fk_districts_municipality_code
+    FOREIGN KEY (municipality_code) REFERENCES municipalities(code)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 UPDATE students
 SET expediente = CONCAT('LEGACY-', LPAD(id, 6, '0'))
@@ -135,6 +171,9 @@ IGNORE 1 LINES
   social_security_number_raw
 );
 
+DROP TEMPORARY TABLE IF EXISTS tmp_students_base;
+
+CREATE TEMPORARY TABLE tmp_students_base AS
 WITH cleaned AS (
   SELECT
     row_id,
@@ -203,21 +242,6 @@ dedupe_expediente AS (
   FROM dedupe_doc
   WHERE rn_doc = 1
 )
-INSERT INTO students (
-  expediente,
-  first_names,
-  last_names,
-  dni_nie,
-  social_security_number,
-  birth_date,
-  age,
-  sex,
-  district,
-  municipality,
-  phone,
-  email,
-  notes
-)
 SELECT
   expediente,
   first_names,
@@ -233,7 +257,99 @@ SELECT
   email,
   notes
 FROM dedupe_expediente
-WHERE rn_expediente = 1
+WHERE rn_expediente = 1;
+
+SET @next_municipality_code := (SELECT COALESCE(MAX(code), 0) FROM municipalities);
+
+INSERT INTO municipalities (code, name)
+SELECT
+  @next_municipality_code := @next_municipality_code + 1 AS code,
+  src.name
+FROM (
+  SELECT DISTINCT municipality AS name
+  FROM tmp_students_base
+  WHERE municipality IS NOT NULL
+) AS src
+LEFT JOIN municipalities m ON m.name = src.name
+WHERE m.code IS NULL
+ORDER BY src.name;
+
+SET @next_district_code := (SELECT COALESCE(MAX(code), 0) FROM districts);
+
+INSERT INTO districts (code, municipality_code, name)
+SELECT
+  @next_district_code := @next_district_code + 1 AS code,
+  src.municipality_code,
+  src.name
+FROM (
+  SELECT DISTINCT
+    m.code AS municipality_code,
+    b.district AS name
+  FROM tmp_students_base b
+  JOIN municipalities m ON m.name = b.municipality
+  WHERE b.district IS NOT NULL
+    AND b.municipality IS NOT NULL
+) AS src
+LEFT JOIN districts d
+  ON d.municipality_code = src.municipality_code
+ AND d.name = src.name
+WHERE d.code IS NULL
+ORDER BY src.municipality_code, src.name;
+
+DROP TEMPORARY TABLE IF EXISTS tmp_students_import;
+
+CREATE TEMPORARY TABLE tmp_students_import AS
+SELECT
+  b.expediente,
+  b.first_names,
+  b.last_names,
+  b.dni_nie,
+  b.social_security_number,
+  b.birth_date,
+  b.age,
+  b.sex,
+  d.code AS district_code,
+  m.code AS municipality_code,
+  b.phone,
+  b.email,
+  b.notes
+FROM tmp_students_base b
+LEFT JOIN municipalities m
+  ON m.name = b.municipality
+LEFT JOIN districts d
+  ON d.municipality_code = m.code
+ AND d.name = b.district;
+
+INSERT INTO students (
+  expediente,
+  first_names,
+  last_names,
+  dni_nie,
+  social_security_number,
+  birth_date,
+  age,
+  sex,
+  district_code,
+  municipality_code,
+  phone,
+  email,
+  notes
+)
+SELECT
+  expediente,
+  first_names,
+  last_names,
+  dni_nie,
+  social_security_number,
+  birth_date,
+  age,
+  sex,
+  district_code,
+  municipality_code,
+  phone,
+  email,
+  notes
+FROM tmp_students_import
 ON DUPLICATE KEY UPDATE
   first_names = VALUES(first_names),
   last_names = VALUES(last_names),
@@ -241,12 +357,14 @@ ON DUPLICATE KEY UPDATE
   birth_date = VALUES(birth_date),
   age = VALUES(age),
   sex = VALUES(sex),
-  district = VALUES(district),
-  municipality = VALUES(municipality),
+  district_code = VALUES(district_code),
+  municipality_code = VALUES(municipality_code),
   phone = VALUES(phone),
   email = VALUES(email),
   notes = VALUES(notes);
 
 SELECT
   (SELECT COUNT(*) FROM students_import_stage) AS staged_rows,
+  (SELECT COUNT(*) FROM municipalities) AS municipalities_total,
+  (SELECT COUNT(*) FROM districts) AS districts_total,
   (SELECT COUNT(*) FROM students) AS students_total;

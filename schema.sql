@@ -19,6 +19,27 @@ CREATE TABLE IF NOT EXISTS courses (
   name VARCHAR(190) NOT NULL,
   UNIQUE KEY uq_courses_code (code)
 ) ENGINE=InnoDB;
+-- Catálogo de municipios
+CREATE TABLE IF NOT EXISTS municipalities (
+  code INT UNSIGNED NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  PRIMARY KEY (code),
+  UNIQUE KEY uq_municipalities_name (name)
+) ENGINE=InnoDB;
+
+-- Catálogo de distritos por municipio
+CREATE TABLE IF NOT EXISTS districts (
+  code INT UNSIGNED NOT NULL,
+  municipality_code INT UNSIGNED NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  PRIMARY KEY (code),
+  UNIQUE KEY uq_districts_municipality_name (municipality_code, name),
+  INDEX idx_districts_municipality_code (municipality_code),
+  CONSTRAINT fk_districts_municipality_code
+    FOREIGN KEY (municipality_code) REFERENCES municipalities(code)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- Alumnos
 CREATE TABLE IF NOT EXISTS students (
@@ -31,14 +52,24 @@ CREATE TABLE IF NOT EXISTS students (
   birth_date DATE NULL,
   age SMALLINT UNSIGNED NULL,
   sex ENUM("mujer","hombre","other","unknown") NOT NULL DEFAULT "unknown",
-  district VARCHAR(120) NULL,
-  municipality VARCHAR(120) NULL,
+  district_code INT UNSIGNED NULL,
+  municipality_code INT UNSIGNED NULL,
   phone VARCHAR(50) NULL,
   email VARCHAR(190) NULL,
   practices_start DATE NULL,
   practices_end DATE NULL,
   employment_status ENUM("unemployed","employed","improved","unknown") DEFAULT "unknown",
   notes TEXT NULL,
+  INDEX idx_students_district_code (district_code),
+  INDEX idx_students_municipality_code (municipality_code),
+  CONSTRAINT fk_students_district_code
+    FOREIGN KEY (district_code) REFERENCES districts(code)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL,
+  CONSTRAINT fk_students_municipality_code
+    FOREIGN KEY (municipality_code) REFERENCES municipalities(code)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL,
   UNIQUE KEY uq_students_expediente (expediente),
   UNIQUE KEY uq_students_dni (dni_nie)
 ) ENGINE=InnoDB;
