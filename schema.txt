@@ -29,14 +29,18 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 ## Alumnos
 
 **Tabla:** students
-
+* id (interno)
+* expediente (Nº Expediente)
 * id (Nº Expediente)
 * first_names (Nombres)
 * last_names (Apellidos)
-* dni_nie
+* dni_nie (DNI / NIE / Pasaporte)
 * social_security_number (Nº Seguridad Social)
 * birth_date (Fecha Nacimiento)
+* age (Edad)
+* sex (Sexo)
 * district (Distrito)
+* municipality (Municipio)
 * phone (Teléfono)
 * email
 * practices_start

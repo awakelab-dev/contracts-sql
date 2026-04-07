@@ -23,18 +23,23 @@ CREATE TABLE IF NOT EXISTS courses (
 -- Alumnos
 CREATE TABLE IF NOT EXISTS students (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  expediente VARCHAR(64) NOT NULL,
   first_names VARCHAR(190) NOT NULL,
   last_names VARCHAR(190) NOT NULL,
   dni_nie VARCHAR(50) NOT NULL,
   social_security_number VARCHAR(50) NULL,
   birth_date DATE NULL,
+  age SMALLINT UNSIGNED NULL,
+  sex ENUM("mujer","hombre","other","unknown") NOT NULL DEFAULT "unknown",
   district VARCHAR(120) NULL,
+  municipality VARCHAR(120) NULL,
   phone VARCHAR(50) NULL,
   email VARCHAR(190) NULL,
   practices_start DATE NULL,
   practices_end DATE NULL,
   employment_status ENUM("unemployed","employed","improved","unknown") DEFAULT "unknown",
   notes TEXT NULL,
+  UNIQUE KEY uq_students_expediente (expediente),
   UNIQUE KEY uq_students_dni (dni_nie)
 ) ENGINE=InnoDB;
 

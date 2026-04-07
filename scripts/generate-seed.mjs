@@ -402,23 +402,31 @@ for (const c of companies) {
 const students = [];
 for (let i = 1; i <= CONFIG.students; i++) {
   const { first_names, last_names, email } = genStudentName(i);
+  const expediente = `EXP-${String(i).padStart(6, '0')}`;
   const dni = genDni(30000000 + i);
   const ssn = `${pad2(rng.int(1, 52))} ${String(rng.int(10000000, 99999999))} ${pad2(rng.int(1, 99))}`;
 
   const birth_year = rng.int(1990, 2004);
   const birth_date = randDateBetween(`${birth_year}-01-01`, `${birth_year}-12-28`);
+  const age = Math.max(0, 2026 - birth_year);
+  const sex = rng.chance(0.52) ? 'mujer' : 'hombre';
 
   const district = rng.pick(DISTRICTS);
+  const municipality = 'Madrid';
   const phone = `6${String(rng.int(0, 99999999)).padStart(8, '0')}`;
 
   students.push({
     id: i,
+    expediente,
     first_names,
     last_names,
     dni_nie: dni,
     social_security_number: ssn,
     birth_date,
+    age,
+    sex,
     district,
+    municipality,
     phone,
     email,
     employment_status: employmentStatus(),
@@ -643,24 +651,32 @@ insertMany(
   lines,
   'students',
   [
+    'expediente',
     'first_names',
     'last_names',
     'dni_nie',
     'social_security_number',
     'birth_date',
+    'age',
+    'sex',
     'district',
+    'municipality',
     'phone',
     'email',
     'employment_status',
     'notes',
   ],
   students.map((s) => [
+    s.expediente,
     s.first_names,
     s.last_names,
     s.dni_nie,
     s.social_security_number,
     s.birth_date,
+    s.age,
+    s.sex,
     s.district,
+    s.municipality,
     s.phone,
     s.email,
     s.employment_status,
