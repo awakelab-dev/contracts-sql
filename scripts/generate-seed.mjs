@@ -514,10 +514,24 @@ for (let i = 1; i <= CONFIG.students; i++) {
   });
 }
 
-const courseItineraryStudents = students.map((student) => ({
-  course_code: rng.pick(COURSE_ITINERARIES)[0],
-  dni_nie: student.dni_nie,
-}));
+const courseItineraryStudents = [];
+let expedienteSeq = 1;
+for (const student of students) {
+  const enrollments = rng.chance(0.35) ? 2 : 1;
+  const chosenCourseCodes = new Set();
+  while (chosenCourseCodes.size < enrollments) {
+    chosenCourseCodes.add(rng.pick(COURSE_ITINERARIES)[0]);
+  }
+  for (const course_code of chosenCourseCodes) {
+    const expediente = `${course_code}_${String(expedienteSeq).padStart(4, '0')}`;
+    expedienteSeq += 1;
+    courseItineraryStudents.push({
+      course_code,
+      expediente,
+      dni_nie: student.dni_nie,
+    });
+  }
+}
 
 // Documents (CV)
 const allStudentIds = students.map((s) => s.id);
@@ -797,8 +811,8 @@ insertMany(
 insertMany(
   lines,
   'course_itinerary_students',
-  ['course_code', 'dni_nie'],
-  courseItineraryStudents.map((row) => [row.course_code, row.dni_nie]),
+  ['course_code', 'expediente', 'dni_nie'],
+  courseItineraryStudents.map((row) => [row.course_code, row.expediente, row.dni_nie]),
   250
 );
 

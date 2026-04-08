@@ -40,6 +40,7 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 **Tabla:** course_itinerary_students
 
 * course_code
+* expediente
 * dni_nie
 
 ---

@@ -79,8 +79,10 @@ CREATE TABLE IF NOT EXISTS students (
 -- Relación cursos-itinerario por alumno (CSV Cursos-Alumnos)
 CREATE TABLE IF NOT EXISTS course_itinerary_students (
   course_code VARCHAR(50) NOT NULL,
+  expediente VARCHAR(64) NOT NULL,
   dni_nie VARCHAR(50) NOT NULL,
-  PRIMARY KEY (course_code, dni_nie),
+  PRIMARY KEY (expediente),
+  INDEX idx_course_itinerary_students_course_code (course_code),
   INDEX idx_course_itinerary_students_dni_nie (dni_nie),
   CONSTRAINT fk_course_itinerary_students_course_code
     FOREIGN KEY (course_code) REFERENCES course_itineraries(course_code)
