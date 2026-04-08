@@ -19,6 +19,13 @@ CREATE TABLE IF NOT EXISTS courses (
   name VARCHAR(190) NOT NULL,
   UNIQUE KEY uq_courses_code (code)
 ) ENGINE=InnoDB;
+
+-- Cursos/itinerarios importados desde CSV
+CREATE TABLE IF NOT EXISTS course_itineraries (
+  course_code VARCHAR(50) NOT NULL,
+  itinerary_name VARCHAR(190) NOT NULL,
+  PRIMARY KEY (course_code)
+) ENGINE=InnoDB;
 -- Catálogo de municipios
 CREATE TABLE IF NOT EXISTS municipalities (
   code INT UNSIGNED NOT NULL,
@@ -43,23 +50,20 @@ CREATE TABLE IF NOT EXISTS districts (
 
 -- Alumnos
 CREATE TABLE IF NOT EXISTS students (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  expediente VARCHAR(64) NOT NULL,
+  dni_nie VARCHAR(50) NOT NULL,
+  id BIGINT NOT NULL AUTO_INCREMENT,
   first_names VARCHAR(190) NOT NULL,
   last_names VARCHAR(190) NOT NULL,
-  dni_nie VARCHAR(50) NOT NULL,
   social_security_number VARCHAR(50) NULL,
   birth_date DATE NULL,
-  age SMALLINT UNSIGNED NULL,
   sex ENUM("mujer","hombre","other","unknown") NOT NULL DEFAULT "unknown",
   district_code INT UNSIGNED NULL,
   municipality_code INT UNSIGNED NULL,
   phone VARCHAR(50) NULL,
   email VARCHAR(190) NULL,
-  practices_start DATE NULL,
-  practices_end DATE NULL,
-  employment_status ENUM("unemployed","employed","improved","unknown") DEFAULT "unknown",
   notes TEXT NULL,
+  PRIMARY KEY (dni_nie),
+  UNIQUE KEY uq_students_id (id),
   INDEX idx_students_district_code (district_code),
   INDEX idx_students_municipality_code (municipality_code),
   CONSTRAINT fk_students_district_code
@@ -69,9 +73,23 @@ CREATE TABLE IF NOT EXISTS students (
   CONSTRAINT fk_students_municipality_code
     FOREIGN KEY (municipality_code) REFERENCES municipalities(code)
     ON UPDATE CASCADE
-    ON DELETE SET NULL,
-  UNIQUE KEY uq_students_expediente (expediente),
-  UNIQUE KEY uq_students_dni (dni_nie)
+    ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Relación cursos-itinerario por alumno (CSV Cursos-Alumnos)
+CREATE TABLE IF NOT EXISTS course_itinerary_students (
+  course_code VARCHAR(50) NOT NULL,
+  dni_nie VARCHAR(50) NOT NULL,
+  PRIMARY KEY (course_code, dni_nie),
+  INDEX idx_course_itinerary_students_dni_nie (dni_nie),
+  CONSTRAINT fk_course_itinerary_students_course_code
+    FOREIGN KEY (course_code) REFERENCES course_itineraries(course_code)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_course_itinerary_students_dni_nie
+    FOREIGN KEY (dni_nie) REFERENCES students(dni_nie)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- Cursos realizados por alumno

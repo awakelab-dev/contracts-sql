@@ -148,6 +148,7 @@ function insertMany(lines, table, columns, rows, chunkSize = 250) {
   }
 }
 
+
 // ---------- Data vocabularies ----------
 
 const SECTORS = [
@@ -301,6 +302,48 @@ const COURSE_TITLES = [
   'Dependiente/a de Comercio',
 ];
 
+const COURSE_ITINERARIES = [
+  ['25EMHA01', 'AYUDANTE DE CAMARERO'],
+  ['25EMHA02', 'AYUDANTE DE COCINA'],
+  ['25EMHA03', 'AYUDANTE DE COCINA'],
+  ['25EMHA04', 'AYUDANTE DE COCINA'],
+  ['25EMHA05', 'AYUDANTE DE CAMARERO'],
+  ['25EMHA06', 'AYUDANTE DE COCINA'],
+  ['25EMHA07', 'AYUDANTE DE COCINA'],
+  ['25EMHA08', 'ATENCION AL CLIENTE EN BARRA Y TIENDA'],
+  ['25EMHA09', 'CdP OPERACIONES BÁSICAS COCINA'],
+  ['25EMHA10', 'COCINA AVANZADA'],
+  ['25EMHA11', 'SERVICIO DE SALA ESPECIALIZADO'],
+  ['25EMHA13', 'AYUDANTE DE CAMARERO'],
+  ['25EMHA14', 'OPERARIO DE DESPIECE'],
+  ['25EMHA15', 'AYUDANTE DE COCINA'],
+  ['25EMHA16', 'AYUDANTE DE CATERING'],
+  ['25EMHA17', 'OPERARIO DE CARNICERIA'],
+  ['25EMHA18', 'OPERARIO DE PESCADERIA'],
+  ['25EMHA20', 'AYUDANTE BARRA Y SALA PASTELERÍA'],
+  ['25EMHA21', 'AYUDANTE DE COCINA'],
+  ['25EMHA22', 'AYUDANTE DE COCINA'],
+  ['25EMHA23', 'AYUDANTE BARRA PASTELERIA'],
+  ['25EMHA24', 'AYUDANTE BARRA PASTELERIA'],
+  ['25EMHA25', 'AYUDANTE CAMARERO'],
+  ['25EMHA26', 'AYUDANTE PANADERÍA Y PASTELERÍA'],
+  ['25EMHA27', 'AYUDANTE PANADERÍA Y PASTELERÍA'],
+  ['25EMHA28', 'OPERARIO DE CARNICERIA'],
+  ['25EMHA29', 'AYUDANTE COCINA'],
+  ['26EMHA01', 'AYUDANTE COCINA'],
+  ['26EMHA02', 'AYUDANTE COCINA'],
+  ['26EMHA03', 'AYUDANTE PANADERÍA Y PASTELERÍA'],
+  ['26EMHA04', 'AYUDANTE SALA Y BARRA'],
+  ['26EMHA05', 'AYUDANTE DE CARNICERIA'],
+  ['26EMHA06', 'AYUDANTE COCINA Y SERVICIO DE MOSTRADOR'],
+  ['26EMHA07', 'ATENCIÓN AL CLIENTE EN SERVICIO DE BARRA Y TIENDA'],
+  ['26EMHA08', 'ELABORACION DE PLATOS, FAST FOOD Y CATERING'],
+  ['26EMHA09', 'AYUDANTE PANADERIA Y PASTELERIA'],
+  ['26EMHA10', 'AYUDANTE SALA Y BARRA'],
+  ['26EMHA11', 'AYUDANTE COCINA'],
+  ['26EMHA12', 'OPERARIO DE CARNICERIA'],
+];
+
 const COURSE_INSTITUTIONS = ['Centro de Formación Madrid', 'Aula Digital', 'Academia Empleo', 'PRL Formación', 'Language Hub'];
 
 const VACANCY_TITLES_BY_SECTOR = {
@@ -388,6 +431,7 @@ for (let i = 1; i <= CONFIG.companies; i++) {
   });
 }
 
+
 const vacancies = [];
 let vacancyId = 1;
 for (const c of companies) {
@@ -441,13 +485,11 @@ for (const district of districtCatalog) {
 const students = [];
 for (let i = 1; i <= CONFIG.students; i++) {
   const { first_names, last_names, email } = genStudentName(i);
-  const expediente = `EXP-${String(i).padStart(6, '0')}`;
   const dni = genDni(30000000 + i);
   const ssn = `${pad2(rng.int(1, 52))} ${String(rng.int(10000000, 99999999))} ${pad2(rng.int(1, 99))}`;
 
   const birth_year = rng.int(1990, 2004);
   const birth_date = randDateBetween(`${birth_year}-01-01`, `${birth_year}-12-28`);
-  const age = Math.max(0, 2026 - birth_year);
   const sex = rng.chance(0.52) ? 'mujer' : 'hombre';
   const municipality =
     rng.chance(0.7) ? municipalityCatalog[0] : rng.pick(municipalityCatalog.slice(1));
@@ -458,22 +500,24 @@ for (let i = 1; i <= CONFIG.students; i++) {
 
   students.push({
     id: i,
-    expediente,
     first_names,
     last_names,
     dni_nie: dni,
     social_security_number: ssn,
     birth_date,
-    age,
     sex,
     district_code: district.code,
     municipality_code: municipality.code,
     phone,
     email,
-    employment_status: employmentStatus(),
     notes: rng.chance(0.15) ? 'Seguimiento recomendado.' : null,
   });
 }
+
+const courseItineraryStudents = students.map((student) => ({
+  course_code: rng.pick(COURSE_ITINERARIES)[0],
+  dni_nie: student.dni_nie,
+}));
 
 // Documents (CV)
 const allStudentIds = students.map((s) => s.id);
@@ -660,6 +704,8 @@ for (const t of [
   'hiring_contracts',
   'pnl',
   'student_courses',
+  'course_itinerary_students',
+  'course_itineraries',
   'vacancies',
   'companies',
   'student_liquidation_balances',
@@ -689,6 +735,17 @@ insertMany(
   vacancies.map((v) => [v.company_id, v.title, v.sector, v.description, v.requirements, v.status, v.created_at]),
   200
 );
+
+insertMany(
+  lines,
+  'course_itineraries',
+  ['course_code', 'itinerary_name'],
+  COURSE_ITINERARIES.map(([course_code, itinerary_name]) => [
+    course_code,
+    itinerary_name,
+  ]),
+  200
+);
 insertMany(
   lines,
   'municipalities',
@@ -709,38 +766,40 @@ insertMany(
   lines,
   'students',
   [
-    'expediente',
     'first_names',
     'last_names',
     'dni_nie',
     'social_security_number',
     'birth_date',
-    'age',
     'sex',
     'district_code',
     'municipality_code',
     'phone',
     'email',
-    'employment_status',
     'notes',
   ],
   students.map((s) => [
-    s.expediente,
     s.first_names,
     s.last_names,
     s.dni_nie,
     s.social_security_number,
     s.birth_date,
-    s.age,
     s.sex,
     s.district_code,
     s.municipality_code,
     s.phone,
     s.email,
-    s.employment_status,
     s.notes,
   ]),
   200
+);
+
+insertMany(
+  lines,
+  'course_itinerary_students',
+  ['course_code', 'dni_nie'],
+  courseItineraryStudents.map((row) => [row.course_code, row.dni_nie]),
+  250
 );
 
 insertMany(

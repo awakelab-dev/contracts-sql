@@ -26,6 +26,24 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 ---
 
+## Cursos e itinerarios (importados CSV)
+
+**Tabla:** course_itineraries
+
+* course_code
+* itinerary_name
+
+---
+
+## Relación cursos-itinerario y alumnos
+
+**Tabla:** course_itinerary_students
+
+* course_code
+* dni_nie
+
+---
+
 ## Distritos
 
 **Tabla:** districts
@@ -49,22 +67,16 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 **Tabla:** students
 * id (interno)
-* expediente (Nº Expediente)
-* id (Nº Expediente)
 * first_names (Nombres)
 * last_names (Apellidos)
 * dni_nie (DNI / NIE / Pasaporte)
 * social_security_number (Nº Seguridad Social)
 * birth_date (Fecha Nacimiento)
-* age (Edad)
 * sex (Sexo)
 * district_code (Código Distrito)
 * municipality_code (Código Municipio)
 * phone (Teléfono)
 * email
-* practices_start
-* practices_end
-* employment_status
 * notes
 
 ---
