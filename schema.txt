@@ -32,6 +32,7 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 * course_code
 * itinerary_name
+* formation_end_date
 
 ---
 
@@ -42,6 +43,10 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 * course_code
 * expediente
 * dni_nie
+* leave_date
+* leave_reason
+* leave_notification
+* course_status
 
 ---
 
@@ -110,23 +115,26 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 ---
 
-## PnL (Prácticas no Laborales)
+## Prácticas no Laborales (Control-Prácticas)
 
-**Tabla:** pnl
+**Tabla:** practices
 
 * id
-* student_id
-* company_nif
+* expediente
+* company_id
 * company_name
-* signer_name
-* signer_nif
 * workplace
-* position
+* does_practices
+* conditions_for_practice
+* practice_shift
+* observations
 * start_date
 * end_date
+* attendance_days
 * schedule
-* weekly_hours
-* observations
+* evaluation
+* practice_status
+* leave_date
 * created_at
 * updated_at
 

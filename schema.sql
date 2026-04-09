@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS courses (
 CREATE TABLE IF NOT EXISTS course_itineraries (
   course_code VARCHAR(50) NOT NULL,
   itinerary_name VARCHAR(190) NOT NULL,
+  formation_end_date DATE NULL,
   PRIMARY KEY (course_code)
 ) ENGINE=InnoDB;
 -- Catálogo de municipios
@@ -81,6 +82,10 @@ CREATE TABLE IF NOT EXISTS course_itinerary_students (
   course_code VARCHAR(50) NOT NULL,
   expediente VARCHAR(64) NOT NULL,
   dni_nie VARCHAR(50) NOT NULL,
+  leave_date DATE NULL,
+  leave_reason VARCHAR(30) NULL,
+  leave_notification VARCHAR(30) NULL,
+  course_status VARCHAR(20) NOT NULL DEFAULT 'APTO',
   PRIMARY KEY (expediente),
   INDEX idx_course_itinerary_students_course_code (course_code),
   INDEX idx_course_itinerary_students_dni_nie (dni_nie),
@@ -120,27 +125,6 @@ CREATE TABLE IF NOT EXISTS course_topics (
   UNIQUE KEY uq_course_topics_title (title)
 ) ENGINE=InnoDB;
 
-
--- PnL (Prácticas no Laborales)
-CREATE TABLE IF NOT EXISTS pnl (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  student_id BIGINT NOT NULL,
-  company_nif VARCHAR(50) NOT NULL,
-  company_name VARCHAR(190) NOT NULL,
-  signer_name VARCHAR(190) NULL,
-  signer_nif VARCHAR(50) NULL,
-  workplace VARCHAR(190) NULL,
-  position VARCHAR(190) NULL,
-  start_date DATE NOT NULL,
-  end_date DATE NULL,
-  schedule TEXT NULL,
-  weekly_hours INT NULL,
-  observations TEXT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_pnl_student (student_id),
-  FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
 
 -- Contrataciones (histórico de contratos)
 CREATE TABLE IF NOT EXISTS hiring_contracts (
@@ -198,6 +182,40 @@ CREATE TABLE IF NOT EXISTS companies (
   notes TEXT NULL,
   UNIQUE KEY uq_company_name (name),
   UNIQUE KEY uq_company_nif (nif)
+) ENGINE=InnoDB;
+
+-- Prácticas no laborales (Control-Prácticas)
+CREATE TABLE IF NOT EXISTS practices (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  expediente VARCHAR(64) NOT NULL,
+  company_id BIGINT NULL,
+  company_name VARCHAR(190) NULL,
+  workplace VARCHAR(255) NULL,
+  does_practices VARCHAR(20) NOT NULL DEFAULT 'NO',
+  conditions_for_practice TEXT NULL,
+  practice_shift TEXT NULL,
+  observations TEXT NULL,
+  start_date DATE NULL,
+  end_date DATE NULL,
+  attendance_days INT NULL,
+  schedule TEXT NULL,
+  evaluation TEXT NULL,
+  practice_status VARCHAR(40) NULL,
+  leave_date DATE NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_practices_expediente (expediente),
+  INDEX idx_practices_company (company_id),
+  INDEX idx_practices_start_date (start_date),
+  INDEX idx_practices_end_date (end_date),
+  CONSTRAINT fk_practices_expediente
+    FOREIGN KEY (expediente) REFERENCES course_itinerary_students(expediente)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_practices_company
+    FOREIGN KEY (company_id) REFERENCES companies(id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- Vacantes

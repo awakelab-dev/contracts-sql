@@ -16,8 +16,6 @@ const CONFIG = {
   vacancies_per_company_max: 3,
   students: 100,
   cvs: 75,
-  pnl_per_student_min: 1,
-  pnl_per_student_max: 5,
   courses_per_student_min: 1,
   courses_per_student_max: 3,
   invitations_per_student_min: 3,
@@ -562,29 +560,67 @@ for (const s of students) {
   }
 }
 
-// PnL
-const pnlRows = [];
-for (const s of students) {
-  const count = rng.int(CONFIG.pnl_per_student_min, CONFIG.pnl_per_student_max);
-  for (let i = 0; i < count; i++) {
-    const c = rng.pick(companies);
-    const start_date = randDateBetween('2024-01-01', '2026-01-10');
-    const end_date = rng.chance(0.85) ? randDateBetween(start_date, '2026-02-01') : null;
-    pnlRows.push({
-      student_id: s.id,
-      company_nif: c.nif,
-      company_name: c.name,
-      signer_name: 'Responsable',
-      signer_nif: genDni(40000000 + rng.int(1, 9999)),
-      workplace: `Madrid - ${rng.pick(DISTRICTS)}`,
-      position: rng.pick(['Auxiliar', 'Apoyo', 'Operario/a', 'Recepción', 'Sala', 'Caja']),
-      start_date,
-      end_date,
-      schedule: rng.chance(0.7) ? 'L-V 09:00-13:00' : 'L-X-V 10:00-14:00',
-      weekly_hours: rng.pick([10, 12, 15, 20, 25, 30]),
-      observations: rng.chance(0.5) ? 'Buen desempeño y actitud.' : null,
-    });
+// Practices
+const practicesRows = [];
+for (const enrollment of courseItineraryStudents) {
+  const modeRoll = rng.next();
+  const does_practices = modeRoll < 0.14 ? 'NO' : modeRoll < 0.22 ? 'INSERCION' : 'SI';
+  const company = rng.pick(companies);
+
+  let company_id = null;
+  let company_name = null;
+  let workplace = null;
+  let start_date = null;
+  let end_date = null;
+  let attendance_days = null;
+  let schedule = null;
+  let evaluation = null;
+  let practice_status = null;
+  let leave_date = null;
+
+  const conditions_for_practice = rng.pick(['DESEMPLEADO', 'MEJORA DE EMPLEO']);
+  const practice_shift = rng.pick(['MAÑANA', 'TARDE', 'INDIFERENTE']);
+  const observations = rng.chance(0.25) ? 'Seguimiento de prácticas.' : null;
+
+  if (does_practices === 'SI') {
+    company_id = company.id;
+    company_name = company.name;
+    workplace = `Madrid - ${rng.pick(DISTRICTS)}`;
+    start_date = randDateBetween('2024-01-01', '2026-01-10');
+    end_date = rng.chance(0.9) ? randDateBetween(start_date, '2026-02-01') : null;
+    attendance_days = rng.pick([8, 9, 10, 12, 16]);
+    schedule = rng.chance(0.7) ? 'L-V 09:00-14:00' : 'L-V 15:00-20:00';
+    if (rng.chance(0.18)) {
+      practice_status = 'INTERRUMPIDAS';
+      leave_date = end_date || start_date;
+      evaluation = 'ABANDONO DE LAS PRÁCTICAS';
+    } else {
+      practice_status = 'FINALIZADAS';
+      evaluation = 'PRACTICAS SUPERADAS';
+    }
+  } else if (does_practices === 'INSERCION') {
+    practice_status = 'INSERCION FORMACION';
+  } else {
+    practice_status = rng.chance(0.55) ? 'NO REALIZA PRACTICAS' : 'NO APTO FORMACION';
   }
+
+  practicesRows.push({
+    expediente: enrollment.expediente,
+    company_id,
+    company_name,
+    workplace,
+    does_practices,
+    conditions_for_practice,
+    practice_shift,
+    observations,
+    start_date,
+    end_date,
+    attendance_days,
+    schedule,
+    evaluation,
+    practice_status,
+    leave_date,
+  });
 }
 
 // Interviews
@@ -716,7 +752,7 @@ for (const t of [
   'employment_contracts',
   'internships',
   'hiring_contracts',
-  'pnl',
+  'practices',
   'student_courses',
   'course_itinerary_students',
   'course_itineraries',
@@ -834,34 +870,40 @@ insertMany(
 
 insertMany(
   lines,
-  'pnl',
+  'practices',
   [
-    'student_id',
-    'company_nif',
+    'expediente',
+    'company_id',
     'company_name',
-    'signer_name',
-    'signer_nif',
     'workplace',
-    'position',
+    'does_practices',
+    'conditions_for_practice',
+    'practice_shift',
+    'observations',
     'start_date',
     'end_date',
+    'attendance_days',
     'schedule',
-    'weekly_hours',
-    'observations',
+    'evaluation',
+    'practice_status',
+    'leave_date',
   ],
-  pnlRows.map((p) => [
-    p.student_id,
-    p.company_nif,
+  practicesRows.map((p) => [
+    p.expediente,
+    p.company_id,
     p.company_name,
-    p.signer_name,
-    p.signer_nif,
     p.workplace,
-    p.position,
+    p.does_practices,
+    p.conditions_for_practice,
+    p.practice_shift,
+    p.observations,
     p.start_date,
     p.end_date,
+    p.attendance_days,
     p.schedule,
-    p.weekly_hours,
-    p.observations,
+    p.evaluation,
+    p.practice_status,
+    p.leave_date,
   ]),
   200
 );
@@ -925,7 +967,7 @@ const counts = {
   students: students.length,
   documents: documents.length,
   student_courses: studentCourses.length,
-  pnl: pnlRows.length,
+  practices: practicesRows.length,
   interviews: interviewRows.length,
   hiring_contracts: contractRows.length,
   invitations: invitationRows.length,
