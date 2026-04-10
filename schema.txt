@@ -32,7 +32,11 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 * course_code
 * itinerary_name
+* formation_start_date
 * formation_end_date
+* formation_schedule
+* company
+* teacher
 
 ---
 

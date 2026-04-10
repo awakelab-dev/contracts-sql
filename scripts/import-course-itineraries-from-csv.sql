@@ -1,7 +1,5 @@
 -- Import course itineraries from:
--- /Users/leonardobarreto/projects/contracts/Imports/EXPEDIENTES ALUMNOS - APP(Cursos).csv
--- and enrich date from:
--- /Users/leonardobarreto/projects/contracts/Imports/EXPEDIENTES ALUMNOS - APP(Atividad-Formativa-Fechas).csv
+-- /Users/leonardobarreto/projects/contracts/Imports/CONTRATOS - DATOS EMPRESAS E CURSOS -APP(cursos).csv
 -- Usage example:
 -- mysql --local-infile=1 -u root -D contracts_app < contracts-sql/scripts/import-course-itineraries-from-csv.sql
 USE contracts_app;
@@ -9,9 +7,29 @@ USE contracts_app;
 CREATE TABLE IF NOT EXISTS course_itineraries (
   course_code VARCHAR(50) NOT NULL,
   itinerary_name VARCHAR(190) NOT NULL,
+  formation_start_date DATE NULL,
   formation_end_date DATE NULL,
+  formation_schedule VARCHAR(120) NULL,
+  company VARCHAR(190) NULL,
+  teacher VARCHAR(190) NULL,
   PRIMARY KEY (course_code)
 ) ENGINE=InnoDB;
+
+SET @formation_start_date_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'course_itineraries'
+    AND COLUMN_NAME = 'formation_start_date'
+);
+SET @ddl := IF(
+  @formation_start_date_exists = 0,
+  'ALTER TABLE course_itineraries ADD COLUMN formation_start_date DATE NULL AFTER itinerary_name',
+  'SELECT 1'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 SET @formation_end_date_exists := (
   SELECT COUNT(*)
@@ -22,66 +40,75 @@ SET @formation_end_date_exists := (
 );
 SET @ddl := IF(
   @formation_end_date_exists = 0,
-  'ALTER TABLE course_itineraries ADD COLUMN formation_end_date DATE NULL AFTER itinerary_name',
+  'ALTER TABLE course_itineraries ADD COLUMN formation_end_date DATE NULL AFTER formation_start_date',
   'SELECT 1'
 );
 PREPARE stmt FROM @ddl;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
-INSERT INTO course_itineraries (course_code, itinerary_name)
-VALUES
-  ('25EMHA01','AYUDANTE DE CAMARERO'),
-  ('25EMHA02','AYUDANTE DE COCINA'),
-  ('25EMHA03','AYUDANTE DE COCINA'),
-  ('25EMHA04','AYUDANTE DE COCINA'),
-  ('25EMHA05','AYUDANTE DE CAMARERO'),
-  ('25EMHA06','AYUDANTE DE COCINA'),
-  ('25EMHA07','AYUDANTE DE COCINA'),
-  ('25EMHA08','ATENCION AL CLIENTE EN BARRA Y TIENDA'),
-  ('25EMHA09','CdP OPERACIONES BÁSICAS COCINA'),
-  ('25EMHA10','COCINA AVANZADA'),
-  ('25EMHA11','SERVICIO DE SALA ESPECIALIZADO'),
-  ('25EMHA13','AYUDANTE DE CAMARERO'),
-  ('25EMHA14','OPERARIO DE DESPIECE'),
-  ('25EMHA15','AYUDANTE DE COCINA'),
-  ('25EMHA16','AYUDANTE DE CATERING'),
-  ('25EMHA17','OPERARIO DE CARNICERIA'),
-  ('25EMHA18','OPERARIO DE PESCADERIA'),
-  ('25EMHA20','AYUDANTE BARRA Y SALA PASTELERÍA'),
-  ('25EMHA21','AYUDANTE DE COCINA'),
-  ('25EMHA22','AYUDANTE DE COCINA'),
-  ('25EMHA23','AYUDANTE BARRA PASTELERIA'),
-  ('25EMHA24','AYUDANTE BARRA PASTELERIA'),
-  ('25EMHA25','AYUDANTE CAMARERO'),
-  ('25EMHA26','AYUDANTE PANADERÍA Y PASTELERÍA'),
-  ('25EMHA27','AYUDANTE PANADERÍA Y PASTELERÍA'),
-  ('25EMHA28','OPERARIO DE CARNICERIA'),
-  ('25EMHA29','AYUDANTE COCINA'),
-  ('26EMHA01','AYUDANTE COCINA'),
-  ('26EMHA02','AYUDANTE COCINA'),
-  ('26EMHA03','AYUDANTE PANADERÍA Y PASTELERÍA'),
-  ('26EMHA04','AYUDANTE SALA Y BARRA'),
-  ('26EMHA05','AYUDANTE DE CARNICERIA'),
-  ('26EMHA06','AYUDANTE COCINA Y SERVICIO DE MOSTRADOR'),
-  ('26EMHA07','ATENCIÓN AL CLIENTE EN SERVICIO DE BARRA Y TIENDA'),
-  ('26EMHA08','ELABORACION DE PLATOS, FAST FOOD Y CATERING'),
-  ('26EMHA09','AYUDANTE PANADERIA Y PASTELERIA'),
-  ('26EMHA10','AYUDANTE SALA Y BARRA'),
-  ('26EMHA11','AYUDANTE COCINA'),
-  ('26EMHA12','OPERARIO DE CARNICERIA')
-ON DUPLICATE KEY UPDATE
-  itinerary_name = VALUES(itinerary_name);
+SET @formation_schedule_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'course_itineraries'
+    AND COLUMN_NAME = 'formation_schedule'
+);
+SET @ddl := IF(
+  @formation_schedule_exists = 0,
+  'ALTER TABLE course_itineraries ADD COLUMN formation_schedule VARCHAR(120) NULL AFTER formation_end_date',
+  'SELECT 1'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-DROP TEMPORARY TABLE IF EXISTS tmp_activity_dates_stage;
-CREATE TEMPORARY TABLE tmp_activity_dates_stage (
+SET @company_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'course_itineraries'
+    AND COLUMN_NAME = 'company'
+);
+SET @ddl := IF(
+  @company_exists = 0,
+  'ALTER TABLE course_itineraries ADD COLUMN company VARCHAR(190) NULL AFTER formation_schedule',
+  'SELECT 1'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @teacher_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'course_itineraries'
+    AND COLUMN_NAME = 'teacher'
+);
+SET @ddl := IF(
+  @teacher_exists = 0,
+  'ALTER TABLE course_itineraries ADD COLUMN teacher VARCHAR(190) NULL AFTER company',
+  'SELECT 1'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+DROP TEMPORARY TABLE IF EXISTS tmp_course_itineraries_stage;
+CREATE TEMPORARY TABLE tmp_course_itineraries_stage (
   row_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  expediente_raw TEXT NULL,
-  formation_date_raw TEXT NULL
+  course_code_raw TEXT NULL,
+  itinerary_name_raw TEXT NULL,
+  formation_start_date_raw TEXT NULL,
+  formation_end_date_raw TEXT NULL,
+  formation_schedule_raw TEXT NULL,
+  company_raw TEXT NULL,
+  teacher_raw TEXT NULL
 ) ENGINE=InnoDB;
 
-LOAD DATA LOCAL INFILE '/Users/leonardobarreto/projects/contracts/Imports/EXPEDIENTES ALUMNOS - APP(Atividad-Formativa-Fechas).csv'
-INTO TABLE tmp_activity_dates_stage
+LOAD DATA LOCAL INFILE '/Users/leonardobarreto/projects/contracts/Imports/CONTRATOS - DATOS EMPRESAS E CURSOS -APP(cursos).csv'
+INTO TABLE tmp_course_itineraries_stage
 CHARACTER SET utf8mb4
 FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '\"'
@@ -89,56 +116,220 @@ ESCAPED BY '\"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (
-  expediente_raw,
-  formation_date_raw
+  course_code_raw,
+  itinerary_name_raw,
+  formation_start_date_raw,
+  formation_end_date_raw,
+  formation_schedule_raw,
+  company_raw,
+  teacher_raw
 );
 
-DROP TEMPORARY TABLE IF EXISTS tmp_activity_dates_normalized;
-CREATE TEMPORARY TABLE tmp_activity_dates_normalized AS
+DROP TEMPORARY TABLE IF EXISTS tmp_course_itineraries_normalized;
+CREATE TEMPORARY TABLE tmp_course_itineraries_normalized AS
 SELECT
-  row_id,
-  UPPER(NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(expediente_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '')) AS expediente,
-  UPPER(SUBSTRING_INDEX(NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(expediente_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), ''), '_', 1)) AS course_code,
+  src.row_id,
+  src.course_code,
+  src.itinerary_name,
   CASE
-    WHEN NULLIF(TRIM(formation_date_raw), '') IS NULL THEN NULL
-    WHEN TRIM(formation_date_raw) REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN STR_TO_DATE(TRIM(formation_date_raw), '%Y-%m-%d')
-    WHEN TRIM(formation_date_raw) REGEXP '^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$' THEN COALESCE(
-      STR_TO_DATE(TRIM(formation_date_raw), '%m/%e/%Y'),
-      STR_TO_DATE(TRIM(formation_date_raw), '%e/%m/%Y')
+    WHEN src.formation_start_date_raw IS NULL THEN NULL
+    WHEN src.formation_start_date_raw REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN STR_TO_DATE(src.formation_start_date_raw, '%Y-%m-%d')
+    WHEN src.formation_start_date_raw REGEXP '^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$' THEN COALESCE(
+      STR_TO_DATE(src.formation_start_date_raw, '%m/%e/%Y'),
+      STR_TO_DATE(src.formation_start_date_raw, '%e/%m/%Y')
     )
     ELSE NULL
-  END AS formation_end_date
-FROM tmp_activity_dates_stage
-WHERE NULLIF(TRIM(expediente_raw), '') IS NOT NULL;
+  END AS formation_start_date,
+  CASE
+    WHEN src.formation_end_date_raw IS NULL THEN NULL
+    WHEN src.formation_end_date_raw REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN STR_TO_DATE(src.formation_end_date_raw, '%Y-%m-%d')
+    WHEN src.formation_end_date_raw REGEXP '^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$' THEN COALESCE(
+      STR_TO_DATE(src.formation_end_date_raw, '%m/%e/%Y'),
+      STR_TO_DATE(src.formation_end_date_raw, '%e/%m/%Y')
+    )
+    ELSE NULL
+  END AS formation_end_date,
+  src.formation_schedule,
+  src.company,
+  src.teacher
+FROM (
+  SELECT
+    row_id,
+    UPPER(
+      REPLACE(
+        NULLIF(
+          TRIM(
+            REGEXP_REPLACE(
+              REPLACE(REPLACE(REPLACE(course_code_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '),
+              '[[:space:]]+',
+              ' '
+            )
+          ),
+          ''
+        ),
+        ' ',
+        ''
+      )
+    ) AS course_code,
+    UPPER(
+      NULLIF(
+        TRIM(
+          REGEXP_REPLACE(
+            REPLACE(REPLACE(REPLACE(itinerary_name_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '),
+            '[[:space:]]+',
+            ' '
+          )
+        ),
+        ''
+      )
+    ) AS itinerary_name,
+    NULLIF(
+      TRIM(
+        REGEXP_REPLACE(
+          REPLACE(REPLACE(REPLACE(formation_start_date_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '),
+          '[[:space:]]+',
+          ' '
+        )
+      ),
+      ''
+    ) AS formation_start_date_raw,
+    NULLIF(
+      TRIM(
+        REGEXP_REPLACE(
+          REPLACE(REPLACE(REPLACE(formation_end_date_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '),
+          '[[:space:]]+',
+          ' '
+        )
+      ),
+      ''
+    ) AS formation_end_date_raw,
+    UPPER(
+      NULLIF(
+        TRIM(
+          REGEXP_REPLACE(
+            REPLACE(REPLACE(REPLACE(formation_schedule_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '),
+            '[[:space:]]+',
+            ' '
+          )
+        ),
+        ''
+      )
+    ) AS formation_schedule,
+    UPPER(
+      NULLIF(
+        TRIM(
+          REGEXP_REPLACE(
+            REPLACE(REPLACE(REPLACE(company_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '),
+            '[[:space:]]+',
+            ' '
+          )
+        ),
+        ''
+      )
+    ) AS company,
+    UPPER(
+      NULLIF(
+        TRIM(
+          REGEXP_REPLACE(
+            REPLACE(REPLACE(REPLACE(teacher_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '),
+            '[[:space:]]+',
+            ' '
+          )
+        ),
+        ''
+      )
+    ) AS teacher
+  FROM tmp_course_itineraries_stage
+) src
+WHERE src.course_code IS NOT NULL
+  AND src.itinerary_name IS NOT NULL;
 
-DROP TEMPORARY TABLE IF EXISTS tmp_course_first_dates;
-CREATE TEMPORARY TABLE tmp_course_first_dates AS
+DROP TEMPORARY TABLE IF EXISTS tmp_course_itineraries_clean;
+CREATE TEMPORARY TABLE tmp_course_itineraries_clean AS
 SELECT
   ranked.course_code,
-  ranked.formation_end_date
+  ranked.itinerary_name,
+  ranked.formation_start_date,
+  ranked.formation_end_date,
+  ranked.formation_schedule,
+  ranked.company,
+  ranked.teacher
 FROM (
   SELECT
     n.course_code,
+    n.itinerary_name,
+    n.formation_start_date,
     n.formation_end_date,
-    ROW_NUMBER() OVER (PARTITION BY n.course_code ORDER BY n.row_id ASC) AS rn
-  FROM tmp_activity_dates_normalized n
-  WHERE n.course_code IS NOT NULL
-    AND n.formation_end_date IS NOT NULL
+    n.formation_schedule,
+    n.company,
+    n.teacher,
+    ROW_NUMBER() OVER (PARTITION BY n.course_code ORDER BY n.row_id DESC) AS rn
+  FROM tmp_course_itineraries_normalized n
 ) ranked
 WHERE ranked.rn = 1;
 
-UPDATE course_itineraries ci
-INNER JOIN tmp_course_first_dates d ON d.course_code = ci.course_code
-SET ci.formation_end_date = d.formation_end_date;
+INSERT INTO course_itineraries (
+  course_code,
+  itinerary_name,
+  formation_start_date,
+  formation_end_date,
+  formation_schedule,
+  company,
+  teacher
+)
+SELECT
+  c.course_code,
+  c.itinerary_name,
+  c.formation_start_date,
+  c.formation_end_date,
+  c.formation_schedule,
+  c.company,
+  c.teacher
+FROM tmp_course_itineraries_clean c
+ON DUPLICATE KEY UPDATE
+  itinerary_name = VALUES(itinerary_name),
+  formation_start_date = VALUES(formation_start_date),
+  formation_end_date = VALUES(formation_end_date),
+  formation_schedule = VALUES(formation_schedule),
+  company = VALUES(company),
+  teacher = VALUES(teacher);
+
+SELECT COUNT(*) AS csv_rows
+FROM tmp_course_itineraries_stage;
+
+SELECT COUNT(*) AS normalized_rows
+FROM tmp_course_itineraries_normalized;
+
+SELECT COUNT(*) AS duplicate_course_codes
+FROM (
+  SELECT course_code
+  FROM tmp_course_itineraries_normalized
+  GROUP BY course_code
+  HAVING COUNT(*) > 1
+) duplicates;
+
+SELECT COUNT(*) AS imported_rows
+FROM tmp_course_itineraries_clean;
 
 SELECT COUNT(*) AS total_course_itineraries
 FROM course_itineraries;
+
+SELECT COUNT(*) AS courses_with_formation_start_date
+FROM course_itineraries
+WHERE formation_start_date IS NOT NULL;
 
 SELECT COUNT(*) AS courses_with_formation_end_date
 FROM course_itineraries
 WHERE formation_end_date IS NOT NULL;
 
-SELECT COUNT(*) AS missing_courses_in_catalog
-FROM tmp_course_first_dates d
-LEFT JOIN course_itineraries ci ON ci.course_code = d.course_code
-WHERE ci.course_code IS NULL;
+SELECT COUNT(*) AS courses_with_schedule
+FROM course_itineraries
+WHERE formation_schedule IS NOT NULL;
+
+SELECT COUNT(*) AS courses_with_company
+FROM course_itineraries
+WHERE company IS NOT NULL;
+
+SELECT COUNT(*) AS courses_with_teacher
+FROM course_itineraries
+WHERE teacher IS NOT NULL;

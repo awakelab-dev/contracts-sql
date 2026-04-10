@@ -24,7 +24,11 @@ CREATE TABLE IF NOT EXISTS courses (
 CREATE TABLE IF NOT EXISTS course_itineraries (
   course_code VARCHAR(50) NOT NULL,
   itinerary_name VARCHAR(190) NOT NULL,
+  formation_start_date DATE NULL,
   formation_end_date DATE NULL,
+  formation_schedule VARCHAR(120) NULL,
+  company VARCHAR(190) NULL,
+  teacher VARCHAR(190) NULL,
   PRIMARY KEY (course_code)
 ) ENGINE=InnoDB;
 -- Catálogo de municipios
