@@ -17,6 +17,7 @@ TRUNCATE TABLE course_itinerary_students;
 TRUNCATE TABLE course_itineraries;
 TRUNCATE TABLE vacancies;
 TRUNCATE TABLE companies;
+TRUNCATE TABLE sectors;
 TRUNCATE TABLE student_liquidation_balances;
 TRUNCATE TABLE liquidation_lines;
 TRUNCATE TABLE liquidations;
@@ -25,37 +26,49 @@ TRUNCATE TABLE municipalities;
 TRUNCATE TABLE districts;
 SET FOREIGN_KEY_CHECKS=1;
 
-INSERT INTO companies (nif, name, company_email, company_phone, sector, contact_name, contact_email, contact_phone, notes) VALUES
-('B10000001', 'NORTE COMERCIO 001 S.L.', 'info@norte.comercio.001.s.l.fake', '+34 615 449 311', 'Atención al cliente', 'RRHH', 'rrhh@norte.comercio.001.s.l.fake', '+34 664 536 659', NULL),
-('B10000002', 'URBANA HOSTELERÍA 002 S.L.', 'info@urbana.hosteleria.002.s.l.fake', '+34 646 279 684', 'Sanidad', 'RRHH', 'rrhh@urbana.hosteleria.002.s.l.fake', '+34 647 634 591', NULL),
-('B10000003', 'ALFA GESTIÓN 003 S.L.', 'info@alfa.gestion.003.s.l.fake', '+34 612 973 966', 'Construcción', 'RRHH', 'rrhh@alfa.gestion.003.s.l.fake', '+34 628 191 226', NULL),
-('B10000004', 'IBÉRICA COMERCIO 004 S.L.', 'info@iberica.comercio.004.s.l.fake', '+34 612 280 340', 'Seguridad', 'RRHH', 'rrhh@iberica.comercio.004.s.l.fake', '+34 684 188 199', NULL),
-('B10000005', 'NORTE TECNOLOGÍA 005 S.L.', 'info@norte.tecnologia.005.s.l.fake', '+34 694 539 972', 'Construcción', 'RRHH', 'rrhh@norte.tecnologia.005.s.l.fake', '+34 687 415 541', NULL),
-('B10000006', 'CENTRAL COMERCIO 006 S.L.', 'info@central.comercio.006.s.l.fake', '+34 649 935 316', 'Logística', 'RRHH', 'rrhh@central.comercio.006.s.l.fake', '+34 685 266 502', 'Empresa colaboradora.'),
-('B10000007', 'EXPERTA GESTIÓN 007 S.L.', 'info@experta.gestion.007.s.l.fake', '+34 614 462 353', 'Logística', 'RRHH', 'rrhh@experta.gestion.007.s.l.fake', '+34 687 406 362', NULL),
-('B10000008', 'NORTE SOLUCIONES 008 S.L.', 'info@norte.soluciones.008.s.l.fake', '+34 683 951 778', 'Limpieza', 'RRHH', 'rrhh@norte.soluciones.008.s.l.fake', '+34 698 707 499', NULL),
-('B10000009', 'NUEVA GESTIÓN 009 S.L.', 'info@nueva.gestion.009.s.l.fake', '+34 633 142 026', 'Atención al cliente', 'RRHH', 'rrhh@nueva.gestion.009.s.l.fake', '+34 695 526 322', NULL),
-('B10000010', 'CENTRAL LOGÍSTICA 010 S.L.', 'info@central.logistica.010.s.l.fake', '+34 616 817 488', 'Comercio', 'RRHH', 'rrhh@central.logistica.010.s.l.fake', '+34 689 450 025', NULL),
-('B10000011', 'URBANA HOSTELERÍA 011 S.L.', 'info@urbana.hosteleria.011.s.l.fake', '+34 695 633 378', 'Hostelería', 'RRHH', 'rrhh@urbana.hosteleria.011.s.l.fake', '+34 657 669 701', NULL),
-('B10000012', 'IBÉRICA LOGÍSTICA 012 S.L.', 'info@iberica.logistica.012.s.l.fake', '+34 615 448 990', 'Comercio', 'RRHH', 'rrhh@iberica.logistica.012.s.l.fake', '+34 688 116 098', 'Empresa colaboradora.'),
-('B10000013', 'GLOBAL DISTRIBUCIÓN 013 S.L.', 'info@global.distribucion.013.s.l.fake', '+34 655 866 623', 'Sanidad', 'RRHH', 'rrhh@global.distribucion.013.s.l.fake', '+34 644 144 416', NULL),
-('B10000014', 'URBANA COMERCIO 014 S.L.', 'info@urbana.comercio.014.s.l.fake', '+34 608 250 853', 'Limpieza', 'RRHH', 'rrhh@urbana.comercio.014.s.l.fake', '+34 643 685 895', NULL),
-('B10000015', 'NORTE TECNOLOGÍA 015 S.L.', 'info@norte.tecnologia.015.s.l.fake', '+34 673 881 035', 'Logística', 'RRHH', 'rrhh@norte.tecnologia.015.s.l.fake', '+34 676 286 861', NULL),
-('B10000016', 'NORTE DISTRIBUCIÓN 016 S.L.', 'info@norte.distribucion.016.s.l.fake', '+34 642 136 661', 'Administración', 'RRHH', 'rrhh@norte.distribucion.016.s.l.fake', '+34 610 081 119', NULL),
-('B10000017', 'NUEVA TECNOLOGÍA 017 S.L.', 'info@nueva.tecnologia.017.s.l.fake', '+34 684 743 372', 'Limpieza', 'RRHH', 'rrhh@nueva.tecnologia.017.s.l.fake', '+34 643 229 502', NULL),
-('B10000018', 'CENTRAL DISTRIBUCIÓN 018 S.L.', 'info@central.distribucion.018.s.l.fake', '+34 695 243 707', 'Limpieza', 'RRHH', 'rrhh@central.distribucion.018.s.l.fake', '+34 697 760 788', NULL),
-('B10000019', 'GLOBAL LOGÍSTICA 019 S.L.', 'info@global.logistica.019.s.l.fake', '+34 686 009 081', 'Tecnología', 'RRHH', 'rrhh@global.logistica.019.s.l.fake', '+34 692 565 350', 'Empresa colaboradora.'),
-('B10000020', 'NUEVA COMERCIO 020 S.L.', 'info@nueva.comercio.020.s.l.fake', '+34 631 373 593', 'Sanidad', 'RRHH', 'rrhh@nueva.comercio.020.s.l.fake', '+34 650 608 692', NULL),
-('B10000021', 'URBANA COMERCIO 021 S.L.', 'info@urbana.comercio.021.s.l.fake', '+34 628 899 098', 'Comercio', 'RRHH', 'rrhh@urbana.comercio.021.s.l.fake', '+34 641 826 725', NULL),
-('B10000022', 'URBANA COMERCIO 022 S.L.', 'info@urbana.comercio.022.s.l.fake', '+34 663 431 198', 'Seguridad', 'RRHH', 'rrhh@urbana.comercio.022.s.l.fake', '+34 646 743 044', NULL),
-('B10000023', 'URBANA SERVICIOS 023 S.L.', 'info@urbana.servicios.023.s.l.fake', '+34 687 558 334', 'Seguridad', 'RRHH', 'rrhh@urbana.servicios.023.s.l.fake', '+34 634 000 927', NULL),
-('B10000024', 'EXPERTA SERVICIOS 024 S.L.', 'info@experta.servicios.024.s.l.fake', '+34 638 355 696', 'Limpieza', 'RRHH', 'rrhh@experta.servicios.024.s.l.fake', '+34 624 051 091', NULL),
-('B10000025', 'EXPERTA TECNOLOGÍA 025 S.L.', 'info@experta.tecnologia.025.s.l.fake', '+34 650 045 166', 'Sanidad', 'RRHH', 'rrhh@experta.tecnologia.025.s.l.fake', '+34 649 532 719', NULL),
-('B10000026', 'GLOBAL SERVICIOS 026 S.L.', 'info@global.servicios.026.s.l.fake', '+34 676 329 605', 'Seguridad', 'RRHH', 'rrhh@global.servicios.026.s.l.fake', '+34 688 516 697', 'Empresa colaboradora.'),
-('B10000027', 'EXPERTA COMERCIO 027 S.L.', 'info@experta.comercio.027.s.l.fake', '+34 657 949 520', 'Tecnología', 'RRHH', 'rrhh@experta.comercio.027.s.l.fake', '+34 628 513 772', NULL),
-('B10000028', 'NUEVA GESTIÓN 028 S.L.', 'info@nueva.gestion.028.s.l.fake', '+34 625 273 044', 'Hostelería', 'RRHH', 'rrhh@nueva.gestion.028.s.l.fake', '+34 645 690 166', NULL),
-('B10000029', 'ALFA DISTRIBUCIÓN 029 S.L.', 'info@alfa.distribucion.029.s.l.fake', '+34 662 769 363', 'Atención al cliente', 'RRHH', 'rrhh@alfa.distribucion.029.s.l.fake', '+34 688 016 431', 'Empresa colaboradora.'),
-('B10000030', 'CENTRAL TECNOLOGÍA 030 S.L.', 'info@central.tecnologia.030.s.l.fake', '+34 699 891 673', 'Tecnología', 'RRHH', 'rrhh@central.tecnologia.030.s.l.fake', '+34 663 879 821', NULL);
+INSERT INTO sectors (id, sector_name) VALUES
+(1, 'Hostelería'),
+(2, 'Comercio'),
+(3, 'Logística'),
+(4, 'Administración'),
+(5, 'Sanidad'),
+(6, 'Construcción'),
+(7, 'Tecnología'),
+(8, 'Atención al cliente'),
+(9, 'Limpieza'),
+(10, 'Seguridad');
+
+INSERT INTO companies (id, nif, name, fiscal_name, sector_id, company_email, company_phone, contact_name, contact_email, contact_phone, notes) VALUES
+(1, 'B10000001', 'NORTE COMERCIO 001 S.L.', 'NORTE COMERCIO 001 S.L.', 8, 'info@norte.comercio.001.s.l.fake', '+34 615 449 311', 'RRHH', 'rrhh@norte.comercio.001.s.l.fake', '+34 664 536 659', NULL),
+(2, 'B10000002', 'URBANA HOSTELERÍA 002 S.L.', 'URBANA HOSTELERÍA 002 S.L.', 5, 'info@urbana.hosteleria.002.s.l.fake', '+34 646 279 684', 'RRHH', 'rrhh@urbana.hosteleria.002.s.l.fake', '+34 647 634 591', NULL),
+(3, 'B10000003', 'ALFA GESTIÓN 003 S.L.', 'ALFA GESTIÓN 003 S.L.', 6, 'info@alfa.gestion.003.s.l.fake', '+34 612 973 966', 'RRHH', 'rrhh@alfa.gestion.003.s.l.fake', '+34 628 191 226', NULL),
+(4, 'B10000004', 'IBÉRICA COMERCIO 004 S.L.', 'IBÉRICA COMERCIO 004 S.L.', 10, 'info@iberica.comercio.004.s.l.fake', '+34 612 280 340', 'RRHH', 'rrhh@iberica.comercio.004.s.l.fake', '+34 684 188 199', NULL),
+(5, 'B10000005', 'NORTE TECNOLOGÍA 005 S.L.', 'NORTE TECNOLOGÍA 005 S.L.', 6, 'info@norte.tecnologia.005.s.l.fake', '+34 694 539 972', 'RRHH', 'rrhh@norte.tecnologia.005.s.l.fake', '+34 687 415 541', NULL),
+(6, 'B10000006', 'CENTRAL COMERCIO 006 S.L.', 'CENTRAL COMERCIO 006 S.L.', 3, 'info@central.comercio.006.s.l.fake', '+34 649 935 316', 'RRHH', 'rrhh@central.comercio.006.s.l.fake', '+34 685 266 502', 'Empresa colaboradora.'),
+(7, 'B10000007', 'EXPERTA GESTIÓN 007 S.L.', 'EXPERTA GESTIÓN 007 S.L.', 3, 'info@experta.gestion.007.s.l.fake', '+34 614 462 353', 'RRHH', 'rrhh@experta.gestion.007.s.l.fake', '+34 687 406 362', NULL),
+(8, 'B10000008', 'NORTE SOLUCIONES 008 S.L.', 'NORTE SOLUCIONES 008 S.L.', 9, 'info@norte.soluciones.008.s.l.fake', '+34 683 951 778', 'RRHH', 'rrhh@norte.soluciones.008.s.l.fake', '+34 698 707 499', NULL),
+(9, 'B10000009', 'NUEVA GESTIÓN 009 S.L.', 'NUEVA GESTIÓN 009 S.L.', 8, 'info@nueva.gestion.009.s.l.fake', '+34 633 142 026', 'RRHH', 'rrhh@nueva.gestion.009.s.l.fake', '+34 695 526 322', NULL),
+(10, 'B10000010', 'CENTRAL LOGÍSTICA 010 S.L.', 'CENTRAL LOGÍSTICA 010 S.L.', 2, 'info@central.logistica.010.s.l.fake', '+34 616 817 488', 'RRHH', 'rrhh@central.logistica.010.s.l.fake', '+34 689 450 025', NULL),
+(11, 'B10000011', 'URBANA HOSTELERÍA 011 S.L.', 'URBANA HOSTELERÍA 011 S.L.', 1, 'info@urbana.hosteleria.011.s.l.fake', '+34 695 633 378', 'RRHH', 'rrhh@urbana.hosteleria.011.s.l.fake', '+34 657 669 701', NULL),
+(12, 'B10000012', 'IBÉRICA LOGÍSTICA 012 S.L.', 'IBÉRICA LOGÍSTICA 012 S.L.', 2, 'info@iberica.logistica.012.s.l.fake', '+34 615 448 990', 'RRHH', 'rrhh@iberica.logistica.012.s.l.fake', '+34 688 116 098', 'Empresa colaboradora.'),
+(13, 'B10000013', 'GLOBAL DISTRIBUCIÓN 013 S.L.', 'GLOBAL DISTRIBUCIÓN 013 S.L.', 5, 'info@global.distribucion.013.s.l.fake', '+34 655 866 623', 'RRHH', 'rrhh@global.distribucion.013.s.l.fake', '+34 644 144 416', NULL),
+(14, 'B10000014', 'URBANA COMERCIO 014 S.L.', 'URBANA COMERCIO 014 S.L.', 9, 'info@urbana.comercio.014.s.l.fake', '+34 608 250 853', 'RRHH', 'rrhh@urbana.comercio.014.s.l.fake', '+34 643 685 895', NULL),
+(15, 'B10000015', 'NORTE TECNOLOGÍA 015 S.L.', 'NORTE TECNOLOGÍA 015 S.L.', 3, 'info@norte.tecnologia.015.s.l.fake', '+34 673 881 035', 'RRHH', 'rrhh@norte.tecnologia.015.s.l.fake', '+34 676 286 861', NULL),
+(16, 'B10000016', 'NORTE DISTRIBUCIÓN 016 S.L.', 'NORTE DISTRIBUCIÓN 016 S.L.', 4, 'info@norte.distribucion.016.s.l.fake', '+34 642 136 661', 'RRHH', 'rrhh@norte.distribucion.016.s.l.fake', '+34 610 081 119', NULL),
+(17, 'B10000017', 'NUEVA TECNOLOGÍA 017 S.L.', 'NUEVA TECNOLOGÍA 017 S.L.', 9, 'info@nueva.tecnologia.017.s.l.fake', '+34 684 743 372', 'RRHH', 'rrhh@nueva.tecnologia.017.s.l.fake', '+34 643 229 502', NULL),
+(18, 'B10000018', 'CENTRAL DISTRIBUCIÓN 018 S.L.', 'CENTRAL DISTRIBUCIÓN 018 S.L.', 9, 'info@central.distribucion.018.s.l.fake', '+34 695 243 707', 'RRHH', 'rrhh@central.distribucion.018.s.l.fake', '+34 697 760 788', NULL),
+(19, 'B10000019', 'GLOBAL LOGÍSTICA 019 S.L.', 'GLOBAL LOGÍSTICA 019 S.L.', 7, 'info@global.logistica.019.s.l.fake', '+34 686 009 081', 'RRHH', 'rrhh@global.logistica.019.s.l.fake', '+34 692 565 350', 'Empresa colaboradora.'),
+(20, 'B10000020', 'NUEVA COMERCIO 020 S.L.', 'NUEVA COMERCIO 020 S.L.', 5, 'info@nueva.comercio.020.s.l.fake', '+34 631 373 593', 'RRHH', 'rrhh@nueva.comercio.020.s.l.fake', '+34 650 608 692', NULL),
+(21, 'B10000021', 'URBANA COMERCIO 021 S.L.', 'URBANA COMERCIO 021 S.L.', 2, 'info@urbana.comercio.021.s.l.fake', '+34 628 899 098', 'RRHH', 'rrhh@urbana.comercio.021.s.l.fake', '+34 641 826 725', NULL),
+(22, 'B10000022', 'URBANA COMERCIO 022 S.L.', 'URBANA COMERCIO 022 S.L.', 10, 'info@urbana.comercio.022.s.l.fake', '+34 663 431 198', 'RRHH', 'rrhh@urbana.comercio.022.s.l.fake', '+34 646 743 044', NULL),
+(23, 'B10000023', 'URBANA SERVICIOS 023 S.L.', 'URBANA SERVICIOS 023 S.L.', 10, 'info@urbana.servicios.023.s.l.fake', '+34 687 558 334', 'RRHH', 'rrhh@urbana.servicios.023.s.l.fake', '+34 634 000 927', NULL),
+(24, 'B10000024', 'EXPERTA SERVICIOS 024 S.L.', 'EXPERTA SERVICIOS 024 S.L.', 9, 'info@experta.servicios.024.s.l.fake', '+34 638 355 696', 'RRHH', 'rrhh@experta.servicios.024.s.l.fake', '+34 624 051 091', NULL),
+(25, 'B10000025', 'EXPERTA TECNOLOGÍA 025 S.L.', 'EXPERTA TECNOLOGÍA 025 S.L.', 5, 'info@experta.tecnologia.025.s.l.fake', '+34 650 045 166', 'RRHH', 'rrhh@experta.tecnologia.025.s.l.fake', '+34 649 532 719', NULL),
+(26, 'B10000026', 'GLOBAL SERVICIOS 026 S.L.', 'GLOBAL SERVICIOS 026 S.L.', 10, 'info@global.servicios.026.s.l.fake', '+34 676 329 605', 'RRHH', 'rrhh@global.servicios.026.s.l.fake', '+34 688 516 697', 'Empresa colaboradora.'),
+(27, 'B10000027', 'EXPERTA COMERCIO 027 S.L.', 'EXPERTA COMERCIO 027 S.L.', 7, 'info@experta.comercio.027.s.l.fake', '+34 657 949 520', 'RRHH', 'rrhh@experta.comercio.027.s.l.fake', '+34 628 513 772', NULL),
+(28, 'B10000028', 'NUEVA GESTIÓN 028 S.L.', 'NUEVA GESTIÓN 028 S.L.', 1, 'info@nueva.gestion.028.s.l.fake', '+34 625 273 044', 'RRHH', 'rrhh@nueva.gestion.028.s.l.fake', '+34 645 690 166', NULL),
+(29, 'B10000029', 'ALFA DISTRIBUCIÓN 029 S.L.', 'ALFA DISTRIBUCIÓN 029 S.L.', 8, 'info@alfa.distribucion.029.s.l.fake', '+34 662 769 363', 'RRHH', 'rrhh@alfa.distribucion.029.s.l.fake', '+34 688 016 431', 'Empresa colaboradora.'),
+(30, 'B10000030', 'CENTRAL TECNOLOGÍA 030 S.L.', 'CENTRAL TECNOLOGÍA 030 S.L.', 7, 'info@central.tecnologia.030.s.l.fake', '+34 699 891 673', 'RRHH', 'rrhh@central.tecnologia.030.s.l.fake', '+34 663 879 821', NULL);
 
 INSERT INTO vacancies (company_id, title, sector, description, requirements, status, created_at) VALUES
 (1, 'Atención al cliente', 'Atención al cliente', 'Atención al cliente en NORTE COMERCIO 001 S.L.. Incorporación inmediata.', NULL, 'open', '2025-12-07 10:26:41'),

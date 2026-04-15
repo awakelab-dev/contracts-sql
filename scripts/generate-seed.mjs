@@ -408,10 +408,15 @@ function employmentStatus() {
 }
 
 // ---------- Generate dataset ----------
-
+const sectors = SECTORS.map((sector_name, index) => ({
+  id: index + 1,
+  sector_name,
+}));
+const sectorIdByName = new Map(sectors.map((s) => [s.sector_name, s.id]));
 const companies = [];
 for (let i = 1; i <= CONFIG.companies; i++) {
   const sector = rng.pick(SECTORS);
+  const sector_id = sectorIdByName.get(sector) ?? null;
   const name = `${rng.pick(COMPANY_ADJ)} ${rng.pick(COMPANY_NOUN)} ${String(i).padStart(3, '0')} S.L.`;
   const nif = genCompanyNif(i);
   const slug = genEmailSlug(name);
@@ -419,7 +424,9 @@ for (let i = 1; i <= CONFIG.companies; i++) {
     id: i,
     nif,
     name,
+    fiscal_name: name,
     sector,
+    sector_id,
     company_email: `info@${slug}.fake`,
     company_phone: genPhone(),
     contact_name: 'RRHH',
@@ -758,6 +765,7 @@ for (const t of [
   'course_itineraries',
   'vacancies',
   'companies',
+  'sectors',
   'student_liquidation_balances',
   'liquidation_lines',
   'liquidations',
@@ -772,9 +780,17 @@ lines.push('');
 
 insertMany(
   lines,
+  'sectors',
+  ['id', 'sector_name'],
+  sectors.map((s) => [s.id, s.sector_name]),
+  100
+);
+
+insertMany(
+  lines,
   'companies',
-  ['nif', 'name', 'company_email', 'company_phone', 'sector', 'contact_name', 'contact_email', 'contact_phone', 'notes'],
-  companies.map((c) => [c.nif, c.name, c.company_email, c.company_phone, c.sector, c.contact_name, c.contact_email, c.contact_phone, c.notes]),
+  ['id', 'nif', 'name', 'fiscal_name', 'sector_id', 'company_email', 'company_phone', 'contact_name', 'contact_email', 'contact_phone', 'notes'],
+  companies.map((c) => [c.id, c.nif, c.name, c.fiscal_name, c.sector_id, c.company_email, c.company_phone, c.contact_name, c.contact_email, c.contact_phone, c.notes]),
   100
 );
 
@@ -962,6 +978,7 @@ fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
 fs.writeFileSync(OUT_FILE, lines.join('\n') + '\n', 'utf8');
 
 const counts = {
+  sectors: sectors.length,
   companies: companies.length,
   vacancies: vacancies.length,
   students: students.length,

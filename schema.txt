@@ -229,18 +229,32 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 ---
 
 ## Empresas
+**Tabla:** sectors
+
+* id
+* sector_name
+
+---
 
 **Tabla:** companies
 
 * id
 * nif
+* cif (alias CSV de CIF)
 * name (Nombre / Razón Social)
+* fiscal_name (Nombre fiscal)
+* sector_id (FK -> sectors.id)
 * company_email (Email Empresa)
 * company_phone (Tlf Empresa)
-* sector
 * contact_name (Contacto)
 * contact_email (Email Contacto)
 * contact_phone
+* contact_date
+* agreement_signed
+* agreement_date
+* agreement_code
+* codigo_convenio (alias CSV de CODIGO CONVENIO)
+* required_position
 * notes
 
 ---

@@ -67,6 +67,8 @@ CREATE TABLE IF NOT EXISTS students (
   phone VARCHAR(50) NULL,
   email VARCHAR(190) NULL,
   notes TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (dni_nie),
   UNIQUE KEY uq_students_id (id),
   INDEX idx_students_district_code (district_code),
@@ -116,6 +118,12 @@ CREATE TABLE IF NOT EXISTS student_courses (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_student_courses_student (student_id),
   FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+-- Sectores de empresa (normalizado)
+CREATE TABLE IF NOT EXISTS sectors (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  sector_name VARCHAR(120) NOT NULL,
+  UNIQUE KEY uq_sectors_name (sector_name)
 ) ENGINE=InnoDB;
 
 -- Catálogo de cursos (normalizado) para Matching con IA
@@ -176,16 +184,29 @@ CREATE TABLE IF NOT EXISTS interviews (
 CREATE TABLE IF NOT EXISTS companies (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   nif VARCHAR(50) NULL,
+  cif VARCHAR(50) NULL,
   name VARCHAR(190) NOT NULL,
+  fiscal_name VARCHAR(255) NULL,
+  sector_id BIGINT NULL,
   company_email VARCHAR(190) NULL,
   company_phone VARCHAR(50) NULL,
-  sector VARCHAR(120) NULL,
-  contact_name VARCHAR(120) NULL,
+  contact_name VARCHAR(190) NULL,
   contact_email VARCHAR(190) NULL,
   contact_phone VARCHAR(50) NULL,
+  contact_date DATE NULL,
+  agreement_signed VARCHAR(10) NULL,
+  agreement_date DATE NULL,
+  agreement_code VARCHAR(64) NULL,
+  codigo_convenio VARCHAR(64) NULL,
+  required_position VARCHAR(255) NULL,
   notes TEXT NULL,
   UNIQUE KEY uq_company_name (name),
-  UNIQUE KEY uq_company_nif (nif)
+  UNIQUE KEY uq_company_nif (nif),
+  INDEX idx_companies_sector_id (sector_id),
+  CONSTRAINT fk_companies_sector
+    FOREIGN KEY (sector_id) REFERENCES sectors(id)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- Prácticas no laborales (Control-Prácticas)
