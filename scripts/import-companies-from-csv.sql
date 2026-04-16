@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS sectors (
 
 CREATE TABLE IF NOT EXISTS companies (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  nif VARCHAR(50) NULL,
   cif VARCHAR(50) NULL,
   name VARCHAR(190) NOT NULL,
   fiscal_name VARCHAR(255) NULL,
@@ -29,14 +28,29 @@ CREATE TABLE IF NOT EXISTS companies (
   agreement_code VARCHAR(64) NULL,
   codigo_convenio VARCHAR(64) NULL,
   required_position VARCHAR(255) NULL,
+  has_complex_practice_centers TINYINT(1) NOT NULL DEFAULT 0,
   notes TEXT NULL,
-  UNIQUE KEY uq_company_name (name),
-  UNIQUE KEY uq_company_nif (nif),
+  UNIQUE KEY uq_company_fiscal_name (fiscal_name),
   INDEX idx_companies_sector_id (sector_id),
   CONSTRAINT fk_companies_sector
     FOREIGN KEY (sector_id) REFERENCES sectors(id)
     ON UPDATE CASCADE
     ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS company_practice_centers (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  company_id BIGINT NOT NULL,
+  address VARCHAR(255) NULL,
+  sector VARCHAR(120) NULL,
+  center VARCHAR(190) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_company_practice_centers_company_id (company_id),
+  CONSTRAINT fk_company_practice_centers_company
+    FOREIGN KEY (company_id) REFERENCES companies(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 SET @col_exists := (
@@ -46,7 +60,7 @@ SET @col_exists := (
     AND TABLE_NAME = 'companies'
     AND COLUMN_NAME = 'cif'
 );
-SET @ddl := IF(@col_exists = 0, 'ALTER TABLE companies ADD COLUMN cif VARCHAR(50) NULL AFTER nif', 'SELECT 1');
+SET @ddl := IF(@col_exists = 0, 'ALTER TABLE companies ADD COLUMN cif VARCHAR(50) NULL AFTER id', 'SELECT 1');
 PREPARE stmt FROM @ddl;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
@@ -212,9 +226,85 @@ SET @col_exists := (
   FROM information_schema.COLUMNS
   WHERE TABLE_SCHEMA = DATABASE()
     AND TABLE_NAME = 'companies'
+    AND COLUMN_NAME = 'has_complex_practice_centers'
+);
+SET @ddl := IF(@col_exists = 0, 'ALTER TABLE companies ADD COLUMN has_complex_practice_centers TINYINT(1) NOT NULL DEFAULT 0 AFTER required_position', 'SELECT 1');
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'companies'
     AND COLUMN_NAME = 'notes'
 );
-SET @ddl := IF(@col_exists = 0, 'ALTER TABLE companies ADD COLUMN notes TEXT NULL AFTER required_position', 'SELECT 1');
+SET @ddl := IF(@col_exists = 0, 'ALTER TABLE companies ADD COLUMN notes TEXT NULL AFTER has_complex_practice_centers', 'SELECT 1');
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @legacy_nif_col_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'companies'
+    AND COLUMN_NAME = 'nif'
+);
+SET @ddl := IF(
+  @legacy_nif_col_exists > 0,
+  'UPDATE companies SET cif = nif WHERE (cif IS NULL OR TRIM(cif) = '''') AND nif IS NOT NULL AND TRIM(nif) <> ''''',
+  'SELECT 1'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @idx_company_name_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'companies'
+    AND INDEX_NAME = 'uq_company_name'
+);
+SET @ddl := IF(
+  @idx_company_name_exists > 0,
+  'ALTER TABLE companies DROP INDEX uq_company_name',
+  'SELECT 1'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @idx_company_nif_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'companies'
+    AND INDEX_NAME = 'uq_company_nif'
+);
+SET @ddl := IF(
+  @idx_company_nif_exists > 0,
+  'ALTER TABLE companies DROP INDEX uq_company_nif',
+  'SELECT 1'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @legacy_nif_col_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'companies'
+    AND COLUMN_NAME = 'nif'
+);
+SET @ddl := IF(
+  @legacy_nif_col_exists > 0,
+  'ALTER TABLE companies DROP COLUMN nif',
+  'SELECT 1'
+);
 PREPARE stmt FROM @ddl;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
@@ -340,7 +430,7 @@ CREATE TEMPORARY TABLE tmp_companies_stage (
   code_raw TEXT NULL,
   commercial_name_raw TEXT NULL,
   fiscal_name_raw TEXT NULL,
-  nif_raw TEXT NULL,
+  cif_raw TEXT NULL,
   sector_raw TEXT NULL,
   contact_name_raw TEXT NULL,
   email_raw TEXT NULL,
@@ -366,7 +456,7 @@ IGNORE 1 LINES
   code_raw,
   commercial_name_raw,
   fiscal_name_raw,
-  nif_raw,
+  cif_raw,
   sector_raw,
   contact_name_raw,
   email_raw,
@@ -387,7 +477,7 @@ SELECT
   CAST(src.code_clean AS UNSIGNED) AS company_id,
   src.company_name,
   src.fiscal_name,
-  src.nif,
+  src.cif,
   src.sector_name,
   src.contact_name,
   src.company_email,
@@ -420,21 +510,18 @@ FROM (
   SELECT
     s.row_id,
     NULLIF(REGEXP_REPLACE(TRIM(s.code_raw), '[^0-9]', ''), '') AS code_clean,
-    COALESCE(
-      NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(s.commercial_name_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), ''),
-      NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(s.fiscal_name_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '')
-    ) AS company_name,
+    NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(s.commercial_name_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS company_name,
     NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(s.fiscal_name_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS fiscal_name,
     UPPER(
       NULLIF(
         REGEXP_REPLACE(
-          TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(s.nif_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')),
+          TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(s.cif_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')),
           '[^[:alnum:]]',
           ''
         ),
         ''
       )
-    ) AS nif,
+    ) AS cif,
     UPPER(NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(s.sector_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '')) AS sector_name,
     NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(s.contact_name_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS contact_name,
     LOWER(NULLIF(REGEXP_SUBSTR(s.email_raw, '[[:alnum:]._%+-]+@[[:alnum:].-]+\\.[[:alpha:]]{2,}'), '')) AS company_email,
@@ -486,7 +573,8 @@ FROM (
   FROM tmp_companies_stage s
 ) src
 WHERE src.code_clean IS NOT NULL
-  AND src.company_name IS NOT NULL;
+  AND src.company_name IS NOT NULL
+  AND src.fiscal_name IS NOT NULL;
 
 DROP TEMPORARY TABLE IF EXISTS tmp_companies_ranked;
 CREATE TEMPORARY TABLE tmp_companies_ranked AS
@@ -498,7 +586,7 @@ SELECT
       (
         (CASE WHEN n.company_name IS NOT NULL THEN 3 ELSE 0 END) +
         (CASE WHEN n.fiscal_name IS NOT NULL THEN 2 ELSE 0 END) +
-        (CASE WHEN n.nif IS NOT NULL THEN 2 ELSE 0 END) +
+        (CASE WHEN n.cif IS NOT NULL THEN 2 ELSE 0 END) +
         (CASE WHEN n.sector_name IS NOT NULL THEN 2 ELSE 0 END) +
         (CASE WHEN n.contact_name IS NOT NULL THEN 1 ELSE 0 END) +
         (CASE WHEN n.company_email IS NOT NULL THEN 1 ELSE 0 END) +
@@ -517,7 +605,7 @@ SELECT
   r.company_id,
   r.company_name,
   r.fiscal_name,
-  r.nif,
+  r.cif,
   r.sector_name,
   r.contact_name,
   r.company_email,
@@ -539,6 +627,22 @@ DELETE FROM companies;
 DELETE FROM sectors;
 SET FOREIGN_KEY_CHECKS=1;
 
+SET @idx_company_fiscal_name_exists := (
+  SELECT COUNT(*)
+  FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'companies'
+    AND INDEX_NAME = 'uq_company_fiscal_name'
+);
+SET @ddl := IF(
+  @idx_company_fiscal_name_exists = 0,
+  'ALTER TABLE companies ADD UNIQUE INDEX uq_company_fiscal_name (fiscal_name)',
+  'SELECT 1'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 INSERT INTO sectors (sector_name)
 SELECT DISTINCT c.sector_name
 FROM tmp_companies_clean c
@@ -547,7 +651,6 @@ ORDER BY c.sector_name;
 
 INSERT INTO companies (
   id,
-  nif,
   cif,
   name,
   fiscal_name,
@@ -567,8 +670,7 @@ INSERT INTO companies (
 )
 SELECT
   c.company_id,
-  c.nif,
-  c.nif,
+  c.cif,
   c.company_name,
   c.fiscal_name,
   s.id,
@@ -656,7 +758,7 @@ WHERE src.company_name_source IS NOT NULL
 INSERT INTO companies (name, fiscal_name, notes)
 SELECT
   m.company_name,
-  m.company_name,
+  NULL,
   'LEGACY AUTO-CREATED TO PRESERVE EXISTING RELATIONS'
 FROM tmp_missing_vacancy_company_names m
 LEFT JOIN companies c
@@ -666,7 +768,7 @@ WHERE c.id IS NULL;
 INSERT IGNORE INTO companies (name, fiscal_name, notes)
 VALUES (
   'EMPRESA NO IDENTIFICADA (LEGACY)',
-  'EMPRESA NO IDENTIFICADA (LEGACY)',
+  NULL,
   'AUTO-CREATED FALLBACK TO PRESERVE EXISTING RELATIONS'
 );
 

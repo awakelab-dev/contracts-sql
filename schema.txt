@@ -239,8 +239,7 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 **Tabla:** companies
 
 * id
-* nif
-* cif (alias CSV de CIF)
+* cif
 * name (Nombre / Razón Social)
 * fiscal_name (Nombre fiscal)
 * sector_id (FK -> sectors.id)
@@ -255,7 +254,20 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 * agreement_code
 * codigo_convenio (alias CSV de CODIGO CONVENIO)
 * required_position
+* has_complex_practice_centers (checkbox: estructura compleja para multi-dirección)
 * notes
+
+---
+
+**Tabla:** company_practice_centers
+
+* id
+* company_id (FK -> companies.id)
+* address (Dirección de Centro de Prácticas, para estructura simple)
+* sector (para estructura compleja)
+* center (para estructura compleja)
+* created_at
+* updated_at
 
 ---
 

@@ -38,7 +38,7 @@ INSERT INTO sectors (id, sector_name) VALUES
 (9, 'Limpieza'),
 (10, 'Seguridad');
 
-INSERT INTO companies (id, nif, name, fiscal_name, sector_id, company_email, company_phone, contact_name, contact_email, contact_phone, notes) VALUES
+INSERT INTO companies (id, cif, name, fiscal_name, sector_id, company_email, company_phone, contact_name, contact_email, contact_phone, notes) VALUES
 (1, 'B10000001', 'NORTE COMERCIO 001 S.L.', 'NORTE COMERCIO 001 S.L.', 8, 'info@norte.comercio.001.s.l.fake', '+34 615 449 311', 'RRHH', 'rrhh@norte.comercio.001.s.l.fake', '+34 664 536 659', NULL),
 (2, 'B10000002', 'URBANA HOSTELERÍA 002 S.L.', 'URBANA HOSTELERÍA 002 S.L.', 5, 'info@urbana.hosteleria.002.s.l.fake', '+34 646 279 684', 'RRHH', 'rrhh@urbana.hosteleria.002.s.l.fake', '+34 647 634 591', NULL),
 (3, 'B10000003', 'ALFA GESTIÓN 003 S.L.', 'ALFA GESTIÓN 003 S.L.', 6, 'info@alfa.gestion.003.s.l.fake', '+34 612 973 966', 'RRHH', 'rrhh@alfa.gestion.003.s.l.fake', '+34 628 191 226', NULL),

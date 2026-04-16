@@ -183,7 +183,6 @@ CREATE TABLE IF NOT EXISTS interviews (
 -- Empresas
 CREATE TABLE IF NOT EXISTS companies (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  nif VARCHAR(50) NULL,
   cif VARCHAR(50) NULL,
   name VARCHAR(190) NOT NULL,
   fiscal_name VARCHAR(255) NULL,
@@ -199,14 +198,30 @@ CREATE TABLE IF NOT EXISTS companies (
   agreement_code VARCHAR(64) NULL,
   codigo_convenio VARCHAR(64) NULL,
   required_position VARCHAR(255) NULL,
+  has_complex_practice_centers TINYINT(1) NOT NULL DEFAULT 0,
   notes TEXT NULL,
-  UNIQUE KEY uq_company_name (name),
-  UNIQUE KEY uq_company_nif (nif),
+  UNIQUE KEY uq_company_fiscal_name (fiscal_name),
   INDEX idx_companies_sector_id (sector_id),
   CONSTRAINT fk_companies_sector
     FOREIGN KEY (sector_id) REFERENCES sectors(id)
     ON UPDATE CASCADE
     ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Direcciones/Centros de prácticas por empresa
+CREATE TABLE IF NOT EXISTS company_practice_centers (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  company_id BIGINT NOT NULL,
+  address VARCHAR(255) NULL,
+  sector VARCHAR(120) NULL,
+  center VARCHAR(190) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_company_practice_centers_company_id (company_id),
+  CONSTRAINT fk_company_practice_centers_company
+    FOREIGN KEY (company_id) REFERENCES companies(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- Prácticas no laborales (Control-Prácticas)

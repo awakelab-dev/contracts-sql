@@ -418,11 +418,11 @@ for (let i = 1; i <= CONFIG.companies; i++) {
   const sector = rng.pick(SECTORS);
   const sector_id = sectorIdByName.get(sector) ?? null;
   const name = `${rng.pick(COMPANY_ADJ)} ${rng.pick(COMPANY_NOUN)} ${String(i).padStart(3, '0')} S.L.`;
-  const nif = genCompanyNif(i);
+  const cif = genCompanyNif(i);
   const slug = genEmailSlug(name);
   companies.push({
     id: i,
-    nif,
+    cif,
     name,
     fiscal_name: name,
     sector,
@@ -656,7 +656,7 @@ for (const s of students) {
 
   for (let i = 0; i < count; i++) {
     const c = rng.pick(companies);
-    let company_nif = c.nif;
+    let company_nif = c.cif;
     let company_name = c.name;
     let sector = c.sector;
 
@@ -683,7 +683,7 @@ for (const s of students) {
     // We override the first contract for the first 10 students.
     if (s.id <= 10 && i === 0) {
       const fixed = companies[(s.id - 1) % companies.length];
-      company_nif = fixed.nif;
+      company_nif = fixed.cif;
       company_name = fixed.name;
       sector = fixed.sector;
 
@@ -789,8 +789,8 @@ insertMany(
 insertMany(
   lines,
   'companies',
-  ['id', 'nif', 'name', 'fiscal_name', 'sector_id', 'company_email', 'company_phone', 'contact_name', 'contact_email', 'contact_phone', 'notes'],
-  companies.map((c) => [c.id, c.nif, c.name, c.fiscal_name, c.sector_id, c.company_email, c.company_phone, c.contact_name, c.contact_email, c.contact_phone, c.notes]),
+  ['id', 'cif', 'name', 'fiscal_name', 'sector_id', 'company_email', 'company_phone', 'contact_name', 'contact_email', 'contact_phone', 'notes'],
+  companies.map((c) => [c.id, c.cif, c.name, c.fiscal_name, c.sector_id, c.company_email, c.company_phone, c.contact_name, c.contact_email, c.contact_phone, c.notes]),
   100
 );
 
