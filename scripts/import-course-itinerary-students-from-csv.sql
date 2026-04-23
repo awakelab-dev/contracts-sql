@@ -10,6 +10,7 @@ CREATE TABLE course_itinerary_students (
   course_code VARCHAR(50) NOT NULL,
   expediente VARCHAR(64) NOT NULL,
   dni_nie VARCHAR(50) NOT NULL,
+  effective_start_date DATE NULL,
   leave_date DATE NULL,
   leave_reason VARCHAR(30) NULL,
   leave_notification VARCHAR(30) NULL,
@@ -75,11 +76,12 @@ FROM (
 ) AS ranked
 WHERE ranked.rn = 1;
 
-INSERT INTO course_itinerary_students (course_code, expediente, dni_nie, course_status)
+INSERT INTO course_itinerary_students (course_code, expediente, dni_nie, effective_start_date, course_status)
 SELECT
   t.course_code,
   t.expediente,
   s.dni_nie,
+  ci.formation_start_date,
   'APTO'
 FROM tmp_course_itinerary_students_clean t
 INNER JOIN course_itineraries ci ON ci.course_code = t.course_code

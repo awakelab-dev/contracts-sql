@@ -116,6 +116,8 @@ CREATE TABLE IF NOT EXISTS students (
   municipality_code INT UNSIGNED NULL,
   phone VARCHAR(50) NULL,
   email VARCHAR(190) NULL,
+  tic VARCHAR(3) NOT NULL DEFAULT 'NO',
+  status_laboral VARCHAR(40) NULL,
   notes TEXT NULL,
   PRIMARY KEY (dni_nie),
   UNIQUE KEY uq_students_id (id),
@@ -293,6 +295,8 @@ SELECT
   m.code AS municipality_code,
   b.phone,
   b.email,
+  'NO' AS tic,
+  NULL AS status_laboral,
   b.notes
 FROM tmp_students_base b
 LEFT JOIN municipalities m
@@ -312,6 +316,8 @@ INSERT INTO students (
   municipality_code,
   phone,
   email,
+  tic,
+  status_laboral,
   notes
 )
 SELECT
@@ -325,6 +331,8 @@ SELECT
   municipality_code,
   phone,
   email,
+  tic,
+  status_laboral,
   notes
 FROM tmp_students_import
 ON DUPLICATE KEY UPDATE
@@ -337,6 +345,8 @@ ON DUPLICATE KEY UPDATE
   municipality_code = VALUES(municipality_code),
   phone = VALUES(phone),
   email = VALUES(email),
+  tic = VALUES(tic),
+  status_laboral = VALUES(status_laboral),
   notes = VALUES(notes);
 
 SELECT

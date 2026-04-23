@@ -11,6 +11,8 @@ CREATE TABLE practices (
   company_id BIGINT NULL,
   company_name VARCHAR(190) NULL,
   workplace VARCHAR(255) NULL,
+  tutor_emha VARCHAR(190) NULL,
+  tutor_company VARCHAR(190) NULL,
   does_practices VARCHAR(20) NOT NULL DEFAULT 'NO',
   conditions_for_practice TEXT NULL,
   practice_shift TEXT NULL,
@@ -116,6 +118,8 @@ SELECT
   src.company_name,
   src.company_name_key,
   src.workplace,
+  src.tutor_emha,
+  src.tutor_company,
   CASE
     WHEN src.does_practices_raw IS NULL THEN NULL
     WHEN src.does_practices_raw LIKE '%INSER%' THEN 'INSERCION'
@@ -216,6 +220,8 @@ FROM (
       )
     ) AS company_name_key,
     NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(workplace_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS workplace,
+    NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(tutor_emha_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS tutor_emha,
+    NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(tutor_company_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS tutor_company,
     NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(start_date_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS start_date_raw,
     NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(end_date_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS end_date_raw,
     NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(attendance_days_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS attendance_days_raw,
@@ -280,6 +286,8 @@ SELECT
   r.company_id,
   r.company_name,
   r.workplace,
+  r.tutor_emha,
+  r.tutor_company,
   CASE
     WHEN r.does_practices IS NOT NULL THEN r.does_practices
     WHEN r.practice_status = 'INSERCION FORMACION' THEN 'INSERCION'
@@ -311,6 +319,8 @@ INSERT INTO practices (
   company_id,
   company_name,
   workplace,
+  tutor_emha,
+  tutor_company,
   does_practices,
   conditions_for_practice,
   practice_shift,
@@ -328,6 +338,8 @@ SELECT
   c.company_id,
   c.company_name,
   c.workplace,
+  c.tutor_emha,
+  c.tutor_company,
   c.does_practices,
   c.conditions_for_practice,
   c.practice_shift,

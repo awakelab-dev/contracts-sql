@@ -66,6 +66,8 @@ CREATE TABLE IF NOT EXISTS students (
   municipality_code INT UNSIGNED NULL,
   phone VARCHAR(50) NULL,
   email VARCHAR(190) NULL,
+  tic VARCHAR(3) NOT NULL DEFAULT 'NO',
+  status_laboral VARCHAR(40) NULL,
   notes TEXT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -88,6 +90,7 @@ CREATE TABLE IF NOT EXISTS course_itinerary_students (
   course_code VARCHAR(50) NOT NULL,
   expediente VARCHAR(64) NOT NULL,
   dni_nie VARCHAR(50) NOT NULL,
+  effective_start_date DATE NULL,
   leave_date DATE NULL,
   leave_reason VARCHAR(30) NULL,
   leave_notification VARCHAR(30) NULL,
@@ -231,6 +234,8 @@ CREATE TABLE IF NOT EXISTS practices (
   company_id BIGINT NULL,
   company_name VARCHAR(190) NULL,
   workplace VARCHAR(255) NULL,
+  tutor_emha VARCHAR(190) NULL,
+  tutor_company VARCHAR(190) NULL,
   does_practices VARCHAR(20) NOT NULL DEFAULT 'NO',
   conditions_for_practice TEXT NULL,
   practice_shift TEXT NULL,
@@ -262,13 +267,20 @@ CREATE TABLE IF NOT EXISTS practices (
 CREATE TABLE IF NOT EXISTS vacancies (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   company_id BIGINT NOT NULL,
+  practice_center_id BIGINT NULL,
+  workplace VARCHAR(255) NULL,
   title VARCHAR(190) NOT NULL,
   sector VARCHAR(120) NULL,
   description TEXT NULL,
   requirements TEXT NULL,
+  horarios TEXT NULL,
+  tipo_contrato VARCHAR(120) NULL,
+  sueldo_aproximado_bruto_anual DECIMAL(12,2) NULL,
   status ENUM("open","closed") DEFAULT "open",
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+  INDEX idx_vacancies_practice_center_id (practice_center_id),
+  FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+  FOREIGN KEY (practice_center_id) REFERENCES company_practice_centers(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- Puntaje de Matching por Vacante vs Curso (IA)

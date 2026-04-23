@@ -47,6 +47,7 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 * course_code
 * expediente
 * dni_nie
+* effective_start_date
 * leave_date
 * leave_reason
 * leave_notification
@@ -87,6 +88,8 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 * municipality_code (Código Municipio)
 * phone (Teléfono)
 * email
+* tic
+* status_laboral
 * notes
 
 ---
@@ -128,6 +131,8 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 * company_id
 * company_name
 * workplace
+* tutor_emha
+* tutor_company
 * does_practices
 * conditions_for_practice
 * practice_shift
@@ -277,10 +282,15 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 * id
 * company_id
-* title
+* practice_center_id
+* workplace
+* title (Puesto de trabajo)
 * sector
 * description
 * requirements
+* horarios
+* tipo_contrato
+* sueldo_aproximado_bruto_anual
 * status
 * created_at
 
