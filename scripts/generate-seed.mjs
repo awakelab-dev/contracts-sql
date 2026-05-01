@@ -25,7 +25,7 @@ const CONFIG = {
   contracts_per_student_min: 2,
   contracts_per_student_max: 10,
 
-  // Contract date bounds (YYYY-MM-DD) for generated hiring_contracts.
+  // Contract date bounds (YYYY-MM-DD) for generated employment_contracts.
   contract_start_min: '2024-01-01',
   contract_start_max: '2026-01-15',
 
@@ -269,20 +269,49 @@ const LAST_NAMES = [
 const COMPANY_ADJ = ['ALFA', 'NUEVA', 'GLOBAL', 'URBANA', 'IBÉRICA', 'NORTE', 'SUR', 'CENTRAL', 'EXPERTA', 'MODERNA'];
 const COMPANY_NOUN = ['SERVICIOS', 'LOGÍSTICA', 'COMERCIO', 'SOLUCIONES', 'GESTIÓN', 'HOSTELERÍA', 'TECNOLOGÍA', 'DISTRIBUCIÓN'];
 
-const CONTRACT_TYPES = ['Indefinido', 'Duración Determinada', 'Temporal'];
-const WORKDAY_OPTIONS = ['Tiempo Completo', 'Tiempo Parcial', 'Fijo Discontínuo'];
-const CONTRIBUTION_GROUPS = [
-  'INGENIEROS Y LICENCIADOS  DE ALTA DIRECCIÓN',
-  'INGENIEROS TÉCNICOS, PERITOS Y AYUDANTES TITULADOS',
-  'JEFES ADMINISTRATIVOS Y DE TALLER',
-  'AYUDANTES NO TITULADOS',
-  'OFICIALES ADMINISTRATIVOS',
-  'SUBALTERNOS',
-  'AUXILIARES ADMINISTRATIVOS',
-  'OFICIALES DE PRIMERA Y SEGUNDA',
-  'OFICIALES DE TERCERA Y ESPECIALISTAS',
-  'PEONES',
-  'TRABAJADORES MENORES DE DIECIOCHO AÑOS, CUALQUIERA QUE SEA SU CATEGORÍA PROFESIONAL',
+const CONTRACT_CODES = [
+  { code: 100, contract_type: 'INDEFINIDO', workday: 'TIEMPO COMPLETO', hiring_mode: 'ORDINARIO' },
+  { code: 109, contract_type: 'INDEFINIDO', workday: 'TIEMPO COMPLETO', hiring_mode: 'FOMENTO CONTRATACIÓN INDEFINIDA/EMPLEO ESTABLE' },
+  { code: 130, contract_type: 'INDEFINIDO', workday: 'TIEMPO COMPLETO', hiring_mode: 'DISCAPACITADOS' },
+  { code: 139, contract_type: 'INDEFINIDO', workday: 'TIEMPO COMPLETO', hiring_mode: 'DISCAPACITADOS' },
+  { code: 150, contract_type: 'INDEFINIDO', workday: 'TIEMPO COMPLETO', hiring_mode: 'FOMENTO CONTRATACIÓN INDEFINIDA/EMPLEO ESTABLE' },
+  { code: 189, contract_type: 'INDEFINIDO', workday: 'TIEMPO COMPLETO', hiring_mode: '' },
+  { code: 200, contract_type: 'INDEFINIDO', workday: 'TIEMPO PARCIAL', hiring_mode: 'ORDINARIO' },
+  { code: 209, contract_type: 'INDEFINIDO', workday: 'TIEMPO PARCIAL', hiring_mode: 'FOMENTO CONTRATACIÓN INDEFINIDA/EMPLEO ESTABLE' },
+  { code: 230, contract_type: 'INDEFINIDO', workday: 'TIEMPO PARCIAL', hiring_mode: 'DISCAPACITADOS' },
+  { code: 239, contract_type: 'INDEFINIDO', workday: 'TIEMPO PARCIAL', hiring_mode: 'DISCAPACITADOS' },
+  { code: 250, contract_type: 'INDEFINIDO', workday: 'TIEMPO PARCIAL', hiring_mode: 'FOMENTO CONTRATACIÓN INDEFINIDA/EMPLEO ESTABLE' },
+  { code: 289, contract_type: 'INDEFINIDO', workday: 'TIEMPO PARCIAL', hiring_mode: '' },
+  { code: 300, contract_type: 'INDEFINIDO', workday: 'FIJO DISCONTINUO', hiring_mode: '' },
+  { code: 309, contract_type: 'INDEFINIDO', workday: 'FIJO DISCONTINUO', hiring_mode: 'FOMENTO CONTRATACIÓN INDEFINIDA/EMPLEO ESTABLE' },
+  { code: 330, contract_type: 'INDEFINIDO', workday: 'FIJO DISCONTINUO', hiring_mode: 'DISCAPACITADOS' },
+  { code: 339, contract_type: 'INDEFINIDO', workday: 'FIJO DISCONTINUO', hiring_mode: 'DISCAPACITADOS' },
+  { code: 350, contract_type: 'INDEFINIDO', workday: 'FIJO DISCONTINUO', hiring_mode: 'FOMENTO CONTRATACIÓN INDEFINIDA/EMPLEO ESTABLE' },
+  { code: 389, contract_type: 'INDEFINIDO', workday: 'FIJO DISCONTINUO', hiring_mode: '' },
+  { code: 401, contract_type: 'DURACIÓN DETERMINADA', workday: 'TIEMPO COMPLETO', hiring_mode: 'OBRAO SERVICIO DETERMINADO' },
+  { code: 402, contract_type: 'DURACIÓN DETERMINADA', workday: 'TIEMPO COMPLETO', hiring_mode: 'EVENTUALPOR CIRCUNSTANCIAS DE LAPRODUCCIÓN' },
+  { code: 403, contract_type: 'DURACIÓN DETERMINADA', workday: 'TIEMPO COMPLETO', hiring_mode: 'INSERCIÓN' },
+  { code: 408, contract_type: 'TEMPORAL', workday: 'TIEMPO COMPLETO', hiring_mode: '' },
+  { code: 410, contract_type: 'DURACIÓN DETERMINADA', workday: 'TIEMPO COMPLETO', hiring_mode: 'INTERINIDAD' },
+  { code: 418, contract_type: 'DURACIÓN DETERMINADA', workday: 'TIEMPO COMPLETO', hiring_mode: 'INTERINIDAD' },
+  { code: 420, contract_type: 'TEMPORAL', workday: 'TIEMPO COMPLETO', hiring_mode: 'PRÁCTICAS' },
+  { code: 421, contract_type: 'TEMPORAL', workday: 'TIEMPO COMPLETO', hiring_mode: 'FORMACIÓN' },
+  { code: 430, contract_type: 'TEMPORAL', workday: 'TIEMPO COMPLETO', hiring_mode: 'DISCAPACITADOS' },
+  { code: 441, contract_type: 'TEMPORAL', workday: 'TIEMPO COMPLETO', hiring_mode: 'RELEVO' },
+  { code: 450, contract_type: 'TEMPORAL', workday: 'TIEMPO COMPLETO', hiring_mode: 'FOMENTO CONTRATACIÓN INDEFINIDA/EMPLEO ESTABLE' },
+  { code: 452, contract_type: 'TEMPORAL', workday: 'TIEMPO COMPLETO', hiring_mode: 'DESEMPLEADOS EMPRESAS DE INSERCIÓN' },
+  { code: 501, contract_type: 'DURACIÓN DETERMINADA', workday: 'TIEMPO PARCIAL', hiring_mode: 'OBRAO SERVICIO DETERMINADO' },
+  { code: 502, contract_type: 'DURACIÓN DETERMINADA', workday: 'TIEMPO PARCIAL', hiring_mode: 'EVENTUALPOR CIRCUNSTANCIAS DE LAPRODUCCIÓN' },
+  { code: 503, contract_type: 'DURACIÓN DETERMINADA', workday: 'TIEMPO PARCIAL', hiring_mode: 'INSERCIÓN' },
+  { code: 508, contract_type: 'TEMPORAL', workday: 'TIEMPO PARCIAL', hiring_mode: '' },
+  { code: 510, contract_type: 'DURACIÓN DETERMINADA', workday: 'TIEMPO PARCIAL', hiring_mode: 'INTERINIDAD' },
+  { code: 518, contract_type: 'DURACIÓN DETERMINADA', workday: 'TIEMPO PARCIAL', hiring_mode: 'INTERINIDAD' },
+  { code: 520, contract_type: 'TEMPORAL', workday: 'TIEMPO PARCIAL', hiring_mode: 'PRÁCTICAS' },
+  { code: 530, contract_type: 'TEMPORAL', workday: 'TIEMPO PARCIAL', hiring_mode: 'DISCAPACITADOS' },
+  { code: 540, contract_type: 'TEMPORAL', workday: 'TIEMPO PARCIAL', hiring_mode: 'JUBILADO PARCIAL' },
+  { code: 541, contract_type: 'TEMPORAL', workday: 'TIEMPO PARCIAL', hiring_mode: 'RELEVO' },
+  { code: 550, contract_type: 'TEMPORAL', workday: 'TIEMPO PARCIAL', hiring_mode: 'FOMENTO CONTRATACIÓN INDEFINIDA/EMPLEO ESTABLE' },
+  { code: 552, contract_type: 'TEMPORAL', workday: 'TIEMPO PARCIAL', hiring_mode: 'DESEMPLEADOS CONTRATADOS POR EMPRESAS DE INSERCIÓN' },
 ];
 
 const COURSE_TITLES = [
@@ -537,6 +566,15 @@ for (const student of students) {
     });
   }
 }
+const studentIdByDniNie = new Map(students.map((student) => [student.dni_nie, student.id]));
+const expedientesByStudentId = new Map();
+for (const row of courseItineraryStudents) {
+  const sid = studentIdByDniNie.get(row.dni_nie);
+  if (!sid) continue;
+  const current = expedientesByStudentId.get(sid) || [];
+  current.push(row.expediente);
+  expedientesByStudentId.set(sid, current);
+}
 
 // Documents (CV)
 const allStudentIds = students.map((s) => s.id);
@@ -649,67 +687,60 @@ for (const s of students) {
   }
 }
 
-// Hiring contracts
+// Employment contracts
 const contractRows = [];
 for (const s of students) {
   const count = rng.int(CONFIG.contracts_per_student_min, CONFIG.contracts_per_student_max);
+  const studentExpedientes = expedientesByStudentId.get(s.id) || [];
+  if (!studentExpedientes.length) continue;
 
   for (let i = 0; i < count; i++) {
     const c = rng.pick(companies);
-    let company_nif = c.cif;
-    let company_name = c.name;
-    let sector = c.sector;
+    const contractCode = rng.pick(CONTRACT_CODES);
+    const expediente = rng.pick(studentExpedientes);
+    const sector_id = c.sector_id;
+    const position = rng.pick(VACANCY_TITLES_BY_SECTOR[c.sector] || ['Operario/a']);
+    const company_id = c.id;
 
     let start_date = randDateBetween(CONFIG.contract_start_min, CONFIG.contract_start_max);
+    let end_date = null;
+    let is_itinerary_company_contract = rng.chance(0.55) ? 'SI' : 'NO';
+    let contract_code = contractCode.code;
+    let attached_contract = rng.chance(0.78) ? 'SI' : 'NO';
+    let attached_work_life = rng.chance(0.7) ? 'SI' : 'NO';
+    let observations = rng.chance(0.25) ? 'Contrato para seguimiento de inserción.' : null;
 
     // Duration days (inclusive)
     const durationDays = rng.int(30, 240);
     const endCandidate = addDaysUTC(parseIsoDateUTC(start_date), durationDays - 1);
     const endCap = parseIsoDateUTC('2026-02-01');
-    let end_date = endCandidate.getTime() > endCap.getTime() ? null : toIsoDate(endCandidate);
-
-    const useWeeklyHours = rng.chance(0.75);
-    let weekly_hours = useWeeklyHours ? rng.pick([20, 30, 40]) : null;
-    let workday_pct = useWeeklyHours ? rng.pick(WORKDAY_OPTIONS) : rng.pick(['50%', '75%', '100%']);
-
-    // Contributed days approximated as duration days, with small noise.
-    let contributed_days = Math.max(15, Math.round(durationDays * (0.9 + rng.next() * 0.2)));
-
-    let contribution_group = rng.pick(CONTRIBUTION_GROUPS);
-    let contract_type = rng.pick(CONTRACT_TYPES);
-    let notes = rng.chance(0.25) ? 'Contrato para seguimiento de inserción.' : null;
+    end_date = endCandidate.getTime() > endCap.getTime() ? null : toIsoDate(endCandidate);
 
     // Guarantee: ensure the dataset can generate jornadas without exceeding 10 contracts per student.
     // We override the first contract for the first 10 students.
     if (s.id <= 10 && i === 0) {
-      const fixed = companies[(s.id - 1) % companies.length];
-      company_nif = fixed.cif;
-      company_name = fixed.name;
-      sector = fixed.sector;
 
       start_date = '2025-01-15';
       end_date = '2025-09-15';
-      workday_pct = 'Tiempo Completo';
-      weekly_hours = 40;
-      contributed_days = 200;
-      contribution_group = 'OFICIALES ADMINISTRATIVOS';
-      contract_type = 'Duración Determinada';
-      notes = 'Contrato full-time largo (dataset) para pruebas de liquidación.';
+      is_itinerary_company_contract = 'SI';
+      attached_contract = 'SI';
+      attached_work_life = 'SI';
+      contract_code = 100;
+      observations = 'Contrato largo (dataset) para pruebas de liquidación.';
     }
 
     contractRows.push({
-      student_id: s.id,
-      company_nif,
-      company_name,
-      sector,
+      expediente,
+      sector_id,
+      position,
+      company_id,
+      is_itinerary_company_contract,
+      contract_code,
+      attached_contract,
+      attached_work_life,
+      observations,
       start_date,
       end_date,
-      workday_pct,
-      contribution_group,
-      contract_type,
-      weekly_hours,
-      contributed_days,
-      notes,
     });
   }
 }
@@ -758,7 +789,6 @@ for (const t of [
   'documents',
   'employment_contracts',
   'internships',
-  'hiring_contracts',
   'practices',
   'student_courses',
   'course_itinerary_students',
@@ -766,6 +796,7 @@ for (const t of [
   'vacancies',
   'companies',
   'sectors',
+  'contract_codes',
   'student_liquidation_balances',
   'liquidation_lines',
   'liquidations',
@@ -784,6 +815,13 @@ insertMany(
   ['id', 'sector_name'],
   sectors.map((s) => [s.id, s.sector_name]),
   100
+);
+insertMany(
+  lines,
+  'contract_codes',
+  ['code', 'contract_type', 'workday', 'hiring_mode'],
+  CONTRACT_CODES.map((c) => [c.code, c.contract_type, c.workday, c.hiring_mode]),
+  200
 );
 
 insertMany(
@@ -934,34 +972,32 @@ insertMany(
 
 insertMany(
   lines,
-  'hiring_contracts',
+  'employment_contracts',
   [
-    'student_id',
-    'company_nif',
-    'company_name',
-    'sector',
+    'expediente',
+    'sector_id',
+    'position',
+    'company_id',
+    'is_itinerary_company_contract',
+    'contract_code',
+    'attached_contract',
+    'attached_work_life',
+    'observations',
     'start_date',
     'end_date',
-    'workday_pct',
-    'contribution_group',
-    'contract_type',
-    'weekly_hours',
-    'contributed_days',
-    'notes',
   ],
   contractRows.map((c) => [
-    c.student_id,
-    c.company_nif,
-    c.company_name,
-    c.sector,
+    c.expediente,
+    c.sector_id,
+    c.position,
+    c.company_id,
+    c.is_itinerary_company_contract,
+    c.contract_code,
+    c.attached_contract,
+    c.attached_work_life,
+    c.observations,
     c.start_date,
     c.end_date,
-    c.workday_pct,
-    c.contribution_group,
-    c.contract_type,
-    c.weekly_hours,
-    c.contributed_days,
-    c.notes,
   ]),
   200
 );
@@ -986,7 +1022,7 @@ const counts = {
   student_courses: studentCourses.length,
   practices: practicesRows.length,
   interviews: interviewRows.length,
-  hiring_contracts: contractRows.length,
+  employment_contracts: contractRows.length,
   invitations: invitationRows.length,
 };
 

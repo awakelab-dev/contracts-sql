@@ -1,7 +1,3 @@
-Claro 😊
-Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de tablas y campos**, pensada para que cualquiera pueda leerla sin perderse en detalles técnicos.
-
----
 
 ## Usuarios
 
@@ -122,6 +118,17 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 ---
 
+## Catálogo de códigos de contrato
+
+**Tabla:** contract_codes
+
+* code
+* contract_type
+* workday
+* hiring_mode
+
+---
+
 ## Prácticas no Laborales (Control-Prácticas)
 
 **Tabla:** practices
@@ -151,21 +158,20 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 ## Contrataciones
 
-**Tabla:** hiring_contracts
+**Tabla:** employment_contracts
 
 * id
-* student_id
-* company_nif
-* company_name
-* sector
+* expediente (FK -> course_itinerary_students.expediente)
+* sector_id (FK -> sectors.id)
+* position
+* company_id (FK -> companies.id)
+* is_itinerary_company_contract
+* contract_code (FK -> contract_codes.code)
+* attached_contract
+* attached_work_life
+* observations
 * start_date
 * end_date
-* workday_pct
-* contribution_group
-* contract_type
-* weekly_hours
-* contributed_days
-* notes
 * created_at
 * updated_at
 
@@ -310,23 +316,6 @@ Aquí tienes una versión **simplificada y no técnica**, solo con **nombres de 
 
 ---
 
-## Empleos / Contratos
-
-**Tabla:** employment_contracts
-
-* id
-* student_id
-* sector
-* position
-* employer
-* contract_type
-* attached_contract
-* workday
-* worked_days
-* start_date
-* end_date
-
----
 
 ## Invitaciones a vacantes
 
