@@ -264,14 +264,20 @@ CREATE TABLE IF NOT EXISTS company_practice_centers (
 ) ENGINE=InnoDB;
 
 -- Prácticas no laborales (Control-Prácticas)
+CREATE TABLE IF NOT EXISTS pnl_registered_companies (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(190) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_pnl_registered_companies_name (name)
+) ENGINE=InnoDB;
 CREATE TABLE IF NOT EXISTS practices (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   expediente VARCHAR(64) NOT NULL,
   company_id BIGINT NULL,
   company_name VARCHAR(190) NULL,
+  pnl_registered_company_id BIGINT NULL,
   workplace VARCHAR(255) NULL,
-  tutor_emha VARCHAR(190) NULL,
-  tutor_company VARCHAR(190) NULL,
   does_practices VARCHAR(20) NOT NULL DEFAULT 'NO',
   conditions_for_practice TEXT NULL,
   practice_shift TEXT NULL,
@@ -287,6 +293,7 @@ CREATE TABLE IF NOT EXISTS practices (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uq_practices_expediente (expediente),
   INDEX idx_practices_company (company_id),
+  INDEX idx_practices_pnl_registered_company_id (pnl_registered_company_id),
   INDEX idx_practices_start_date (start_date),
   INDEX idx_practices_end_date (end_date),
   CONSTRAINT fk_practices_expediente
@@ -296,7 +303,40 @@ CREATE TABLE IF NOT EXISTS practices (
   CONSTRAINT fk_practices_company
     FOREIGN KEY (company_id) REFERENCES companies(id)
     ON UPDATE CASCADE
+    ON DELETE SET NULL,
+  CONSTRAINT fk_practices_pnl_registered_company
+    FOREIGN KEY (pnl_registered_company_id) REFERENCES pnl_registered_companies(id)
+    ON UPDATE CASCADE
     ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS tutors (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  dni VARCHAR(32) NOT NULL,
+  full_name VARCHAR(190) NOT NULL,
+  phone VARCHAR(50) NULL,
+  tutor_of ENUM('EMHA', 'COMPANY') NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_tutors_dni_role (dni, tutor_of),
+  INDEX idx_tutors_dni (dni)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS practice_tutors (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  practice_id BIGINT NOT NULL,
+  tutor_id BIGINT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_practice_tutors_pair (practice_id, tutor_id),
+  INDEX idx_practice_tutors_tutor_id (tutor_id),
+  CONSTRAINT fk_practice_tutors_practice
+    FOREIGN KEY (practice_id) REFERENCES practices(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_practice_tutors_tutor
+    FOREIGN KEY (tutor_id) REFERENCES tutors(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- Vacantes

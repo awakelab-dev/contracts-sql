@@ -12,6 +12,36 @@
 
 ---
 
+**Tabla:** pnl_registered_companies
+
+* id
+* name
+* created_at
+* updated_at
+
+---
+
+**Tabla:** tutors
+
+* id
+* dni
+* full_name
+* phone
+* tutor_of (EMHA o COMPANY)
+* created_at
+* updated_at
+
+---
+
+**Tabla:** practice_tutors
+
+* id
+* practice_id (FK -> practices.id)
+* tutor_id (FK -> tutors.id)
+* created_at
+
+---
+
 ## Cursos
 
 **Tabla:** courses
@@ -137,9 +167,8 @@
 * expediente
 * company_id
 * company_name
+* pnl_registered_company_id
 * workplace
-* tutor_emha
-* tutor_company
 * does_practices
 * conditions_for_practice
 * practice_shift

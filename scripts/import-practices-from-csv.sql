@@ -4,15 +4,26 @@
 -- mysql --local-infile=1 -u root -D contracts_app < contracts-sql/scripts/import-practices-from-csv.sql
 USE contracts_app;
 
+DROP TABLE IF EXISTS practice_tutors;
+DROP TABLE IF EXISTS tutors;
 DROP TABLE IF EXISTS practices;
+DROP TABLE IF EXISTS pnl_registered_companies;
+
+CREATE TABLE pnl_registered_companies (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(190) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_pnl_registered_companies_name (name)
+) ENGINE=InnoDB;
+
 CREATE TABLE practices (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   expediente VARCHAR(64) NOT NULL,
   company_id BIGINT NULL,
   company_name VARCHAR(190) NULL,
+  pnl_registered_company_id BIGINT NULL,
   workplace VARCHAR(255) NULL,
-  tutor_emha VARCHAR(190) NULL,
-  tutor_company VARCHAR(190) NULL,
   does_practices VARCHAR(20) NOT NULL DEFAULT 'NO',
   conditions_for_practice TEXT NULL,
   practice_shift TEXT NULL,
@@ -28,6 +39,7 @@ CREATE TABLE practices (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uq_practices_expediente (expediente),
   INDEX idx_practices_company (company_id),
+  INDEX idx_practices_pnl_registered_company_id (pnl_registered_company_id),
   INDEX idx_practices_start_date (start_date),
   INDEX idx_practices_end_date (end_date),
   CONSTRAINT fk_practices_expediente
@@ -37,7 +49,40 @@ CREATE TABLE practices (
   CONSTRAINT fk_practices_company
     FOREIGN KEY (company_id) REFERENCES companies(id)
     ON UPDATE CASCADE
+    ON DELETE SET NULL,
+  CONSTRAINT fk_practices_pnl_registered_company
+    FOREIGN KEY (pnl_registered_company_id) REFERENCES pnl_registered_companies(id)
+    ON UPDATE CASCADE
     ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE tutors (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  dni VARCHAR(32) NOT NULL,
+  full_name VARCHAR(190) NOT NULL,
+  phone VARCHAR(50) NULL,
+  tutor_of ENUM('EMHA','COMPANY') NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_tutors_dni_role (dni, tutor_of),
+  INDEX idx_tutors_dni (dni)
+) ENGINE=InnoDB;
+
+CREATE TABLE practice_tutors (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  practice_id BIGINT NOT NULL,
+  tutor_id BIGINT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_practice_tutors_pair (practice_id, tutor_id),
+  INDEX idx_practice_tutors_tutor_id (tutor_id),
+  CONSTRAINT fk_practice_tutors_practice
+    FOREIGN KEY (practice_id) REFERENCES practices(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT fk_practice_tutors_tutor
+    FOREIGN KEY (tutor_id) REFERENCES tutors(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 DROP TEMPORARY TABLE IF EXISTS tmp_practices_stage;
@@ -118,8 +163,6 @@ SELECT
   src.company_name,
   src.company_name_key,
   src.workplace,
-  src.tutor_emha,
-  src.tutor_company,
   CASE
     WHEN src.does_practices_raw IS NULL THEN NULL
     WHEN src.does_practices_raw LIKE '%INSER%' THEN 'INSERCION'
@@ -220,8 +263,6 @@ FROM (
       )
     ) AS company_name_key,
     NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(workplace_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS workplace,
-    NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(tutor_emha_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS tutor_emha,
-    NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(tutor_company_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS tutor_company,
     NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(start_date_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS start_date_raw,
     NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(end_date_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS end_date_raw,
     NULLIF(TRIM(REGEXP_REPLACE(REPLACE(REPLACE(REPLACE(attendance_days_raw, CHAR(13), ' '), CHAR(10), ' '), CHAR(9), ' '), '[[:space:]]+', ' ')), '') AS attendance_days_raw,
@@ -286,8 +327,6 @@ SELECT
   r.company_id,
   r.company_name,
   r.workplace,
-  r.tutor_emha,
-  r.tutor_company,
   CASE
     WHEN r.does_practices IS NOT NULL THEN r.does_practices
     WHEN r.practice_status = 'INSERCION FORMACION' THEN 'INSERCION'
@@ -319,8 +358,6 @@ INSERT INTO practices (
   company_id,
   company_name,
   workplace,
-  tutor_emha,
-  tutor_company,
   does_practices,
   conditions_for_practice,
   practice_shift,
@@ -338,8 +375,6 @@ SELECT
   c.company_id,
   c.company_name,
   c.workplace,
-  c.tutor_emha,
-  c.tutor_company,
   c.does_practices,
   c.conditions_for_practice,
   c.practice_shift,
